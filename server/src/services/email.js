@@ -10,17 +10,31 @@ const RIDER_TEMPLATE_ID  = process.env.EMAILJS_RIDER_TEMPLATE_ID;
 const DRIVER_TEMPLATE_ID = process.env.EMAILJS_DRIVER_TEMPLATE_ID;
 
 async function sendEmailJS(templateId, templateParams) {
+  // Config Check
+  if (!EMAILJS_SERVICE_ID || !EMAILJS_PUBLIC_KEY || !EMAILJS_PRIVATE_KEY) {
+    console.error('❌ EmailJS Error: Missing configuration in .env');
+    return;
+  }
+
   try {
-    await axios.post('https://api.emailjs.com/api/v1.0/email/send', {
+    const response = await axios.post('https://api.emailjs.com/api/v1.0/email/send', {
       service_id: EMAILJS_SERVICE_ID,
       template_id: templateId,
       user_id: EMAILJS_PUBLIC_KEY,
       accessToken: EMAILJS_PRIVATE_KEY,
       template_params: templateParams
     });
+    console.log(`✅ Email sent successfully to ${templateParams.to_email}`);
+    return response.data;
   } catch (error) {
-    console.error('EmailJS Error:', error.response?.data || error.message);
-    throw error;
+    const errorData = error.response?.data;
+    console.error('❌ EmailJS API Error:', {
+      status: error.response?.status,
+      message: typeof errorData === 'string' ? errorData : JSON.stringify(errorData),
+      template: templateId
+    });
+    // Don't re-throw to avoid crashing the booking process, 
+    // but the error is now visible in your console.
   }
 }
 
