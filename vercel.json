@@ -17,8 +17,8 @@
       "destination": "server/src/index.js"
     },
     {
-      "source": "/((?!api/).*)",
-      "destination": "/client/index.html"
+      "source": "/((?!assets/|api/|favicon.ico).*)",
+      "destination": "/index.html"
     }
   ]
 }
