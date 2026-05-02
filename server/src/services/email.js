@@ -1,28 +1,42 @@
-const { Resend } = require('resend');
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = `${process.env.RESEND_FROM_NAME} <${process.env.RESEND_FROM_EMAIL}>`;
+const axios = require('axios');
+
+// EmailJS Configuration from environment variables
+const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID;
+const EMAILJS_PRIVATE_KEY = process.env.EMAILJS_PRIVATE_KEY;
+const EMAILJS_PUBLIC_KEY  = process.env.EMAILJS_PUBLIC_KEY;
+
+// You need to create these templates in EmailJS and put their IDs in .env
+const RIDER_TEMPLATE_ID  = process.env.EMAILJS_RIDER_TEMPLATE_ID;
+const DRIVER_TEMPLATE_ID = process.env.EMAILJS_DRIVER_TEMPLATE_ID;
+
+async function sendEmailJS(templateId, templateParams) {
+  try {
+    await axios.post('https://api.emailjs.com/api/v1.0/email/send', {
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: templateId,
+      user_id: EMAILJS_PUBLIC_KEY,
+      accessToken: EMAILJS_PRIVATE_KEY,
+      template_params: templateParams
+    });
+  } catch (error) {
+    console.error('EmailJS Error:', error.response?.data || error.message);
+    throw error;
+  }
+}
 
 // Email 1: sent to the rider who just booked
 async function sendBookingConfirmationRider({
   riderEmail, riderName, driverName,
   origin, destination, startTime, fare
 }) {
-  return resend.emails.send({
-    from: FROM,
-    to: riderEmail,
-    subject: 'RideBoard — Your seat is confirmed',
-    html: `
-      <h2>Booking Confirmed!</h2>
-      <p>Hi ${riderName},</p>
-      <p>You've secured a seat on <strong>${driverName}'s</strong> ride.</p>
-      <table cellpadding="8" style="border-collapse:collapse">
-        <tr><td><strong>From</strong></td><td>${origin}</td></tr>
-        <tr><td><strong>To</strong></td><td>${destination}</td></tr>
-        <tr><td><strong>Departure</strong></td><td>${new Date(startTime).toLocaleString('en-PK')}</td></tr>
-        <tr><td><strong>Fare</strong></td><td>PKR ${fare}</td></tr>
-      </table>
-      <p>Safe travels!</p>
-    `
+  return sendEmailJS(RIDER_TEMPLATE_ID, {
+    to_email: riderEmail,
+    rider_name: riderName,
+    driver_name: driverName,
+    origin: origin,
+    destination: destination,
+    start_time: new Date(startTime).toLocaleString('en-PK'),
+    fare: fare
   });
 }
 
@@ -31,21 +45,16 @@ async function sendBookingNotificationDriver({
   driverEmail, driverName, riderName, riderPhone,
   origin, destination, startTime
 }) {
-  return resend.emails.send({
-    from: FROM,
-    to: driverEmail,
-    subject: 'RideBoard — New booking on your ride',
-    html: `
-      <h2>Someone Booked Your Ride!</h2>
-      <p>Hi ${driverName},</p>
-      <p><strong>${riderName}</strong> has booked a seat on your ride.</p>
-      <table cellpadding="8" style="border-collapse:collapse">
-        <tr><td><strong>Route</strong></td><td>${origin} → ${destination}</td></tr>
-        <tr><td><strong>Departure</strong></td><td>${new Date(startTime).toLocaleString('en-PK')}</td></tr>
-        <tr><td><strong>Rider phone</strong></td><td>${riderPhone || 'Not provided'}</td></tr>
-      </table>
-    `
+  return sendEmailJS(DRIVER_TEMPLATE_ID, {
+    to_email: driverEmail,
+    driver_name: driverName,
+    rider_name: riderName,
+    rider_phone: riderPhone || 'Not provided',
+    origin: origin,
+    destination: destination,
+    start_time: new Date(startTime).toLocaleString('en-PK')
   });
 }
 
 module.exports = { sendBookingConfirmationRider, sendBookingNotificationDriver };
+
