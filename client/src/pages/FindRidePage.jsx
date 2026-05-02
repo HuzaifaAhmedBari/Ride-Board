@@ -138,8 +138,58 @@ export default function FindRidePage() {
           ? { ...r, seats_remaining: r.seats_remaining - 1, status: r.seats_remaining - 1 === 0 ? 'full' : 'active' }
           : r
       ));
+
+      // NEW: Send Emails from Frontend
+      const emailParams = {
+        service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        public_key: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+        rider_template: import.meta.env.VITE_EMAILJS_RIDER_TEMPLATE_ID,
+        driver_template: import.meta.env.VITE_EMAILJS_DRIVER_TEMPLATE_ID,
+      };
+
+      if (emailParams.service_id && emailParams.public_key) {
+        // 1. Send Confirmation to Rider
+        emailjs.send(
+          emailParams.service_id,
+          emailParams.rider_template,
+          {
+            to_email: user.email,
+            rider_name: profile?.name || 'Rider',
+            driver_name: ride.poster.name,
+            origin: ride.origin_address,
+            destination: ride.destination_address,
+            start_time: new Date(ride.start_time).toLocaleString('en-PK'),
+            fare: ride.fare_per_seat
+          },
+          emailParams.public_key
+        ).catch(e => console.error('Rider Email Error:', e));
+
+        // 2. Send Notification to Driver
+        if (ride.poster?.email) {
+          emailjs.send(
+            emailParams.service_id,
+            emailParams.driver_template,
+            {
+              to_email: ride.poster.email,
+              driver_name: ride.poster.name,
+              rider_name: profile?.name || 'Rider',
+              rider_phone: profile?.phone || 'Not provided',
+              origin: ride.origin_address,
+              destination: ride.destination_address,
+              start_time: new Date(ride.start_time).toLocaleString('en-PK')
+            },
+            emailParams.public_key
+          ).catch(e => console.error('Driver Email Error:', e));
+        }
+      }
+
     } catch (err) {
-      setBookingError(err.response?.data?.error || 'Booking failed');
+      const errorMsg = err.response?.data?.error || '';
+      if (errorMsg.includes('bookings_ride_id_rider_id_key')) {
+        setBookingError('You have already booked this ride.');
+      } else {
+        setBookingError(errorMsg || 'Booking failed');
+      }
     }
   }
 

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
-const { sendBookingConfirmationRider, sendBookingNotificationDriver } = require('../services/email');
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -65,34 +64,9 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ error: bookErr.message });
     }
 
-    // Fetch rider profile for emails
+    // Fetch rider profile (optional now on backend, but good to keep for verification)
     const { data: rider } = await supabase
       .from('users').select('name, phone').eq('id', req.user.id).single();
-
-    // Fire-and-forget emails
-    sendBookingConfirmationRider({
-      riderEmail: req.user.email,
-      riderName: rider.name,
-      driverName: ride.poster.name,
-      origin: ride.origin_address,
-      destination: ride.destination_address,
-      startTime: ride.start_time,
-      fare: ride.fare_per_seat
-    }).catch(console.error);
-
-    // Fetch driver's auth email via admin API
-    supabase.auth.admin.getUserById(ride.poster_id)
-      .then(({ data: { user: driverUser } }) =>
-        sendBookingNotificationDriver({
-          driverEmail: driverUser.email,
-          driverName: ride.poster.name,
-          riderName: rider.name,
-          riderPhone: rider.phone,
-          origin: ride.origin_address,
-          destination: ride.destination_address,
-          startTime: ride.start_time
-        })
-      ).catch(console.error);
 
     res.json(booking);
   } catch (err) {
