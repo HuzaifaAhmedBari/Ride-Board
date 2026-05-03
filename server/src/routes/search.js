@@ -4,8 +4,8 @@ const supabase = require('../db');
 const { haversineDistance } = require('../utils/geo');
 
 // Proximity thresholds for ride matching
-const PICKUP_RADIUS_KM      = 3; // rider's pickup must be within this of any point on the route polyline
-const DESTINATION_RADIUS_KM = 3; // rider's dropoff must be within this of the route's destination
+const PICKUP_RADIUS_KM      = 1; // rider's pickup must be within this of any point on the route polyline
+const DESTINATION_RADIUS_KM = 2; // rider's dropoff must be within this of the route's destination
 
 /**
  * POST /api/search
