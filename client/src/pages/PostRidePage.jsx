@@ -53,13 +53,13 @@ export default function PostRidePage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Origin</label>
-            <AddressSearchBox placeholder="Search origin..." onSelect={setOrigin} />
+            <AddressSearchBox placeholder="Search origin..." onSelect={setOrigin} value={origin?.address} />
             <MapPicker value={origin} onChange={setOrigin} height={200} />
           </div>
 
           <div className="form-group">
             <label className="form-label">Destination</label>
-            <AddressSearchBox placeholder="Search destination..." onSelect={setDestination} />
+            <AddressSearchBox placeholder="Search destination..." onSelect={setDestination} value={destination?.address} />
             <MapPicker value={destination} onChange={setDestination} height={200} />
           </div>
 

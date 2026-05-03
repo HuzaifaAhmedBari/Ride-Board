@@ -1,13 +1,18 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 // Props:
 //   onSelect    — called with { lat, lng, address } when user picks a suggestion
 //   placeholder — input placeholder text
-export default function AddressSearchBox({ onSelect, placeholder = 'Search a location...' }) {
-  const [query, setQuery]             = useState('');
+//   value       — external value to sync with
+export default function AddressSearchBox({ onSelect, placeholder = 'Search a location...', value = '' }) {
+  const [query, setQuery]             = useState(value);
   const [suggestions, setSuggestions] = useState([]);
   const [searching, setSearching]     = useState(false);
   const debounceRef = useRef(null);
+
+  useEffect(() => {
+    setQuery(value);
+  }, [value]);
 
   function handleChange(e) {
     const val = e.target.value;
