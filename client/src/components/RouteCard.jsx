@@ -19,8 +19,8 @@ function SeatDots({ total, remaining }) {
   );
 }
 
-// Props: { ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook, isCompleted }
-export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook = true, isCompleted }) {
+// Props: { ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook, isCompleted, hideBadge }
+export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook = true, isCompleted, hideBadge }) {
   const badge = getStatusBadge(ride);
   const canBook = !alreadyBooked && !isOwnRide && ride.status === 'active' && ride.seats_remaining > 0;
 
@@ -41,22 +41,32 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
           <span className="route-arrow">→</span>
           <span className="route-dest">{ride.destination_address.split(',')[0]}</span>
         </div>
-        <span className={`badge ${isCompleted ? 'badge-grey' : badge.cls}`}>{isCompleted ? 'Completed' : badge.label}</span>
+        {!hideBadge && (
+          <span className={`badge ${isCompleted ? 'badge-grey' : badge.cls}`}>{isCompleted ? 'Completed' : badge.label}</span>
+        )}
       </div>
 
       <div className="route-card-meta">
         <span className="meta-item">
           🧑‍✈️{' '}
           {ride.poster ? (
-            <Link
-              to={`/driver/${ride.poster.id}`}
-              className="driver-link"
-              onClick={e => e.stopPropagation()}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {ride.poster.name}
-            </Link>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Link
+                to={`/driver/${ride.poster.id}`}
+                className="driver-link"
+                onClick={e => e.stopPropagation()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {ride.poster.name}
+              </Link>
+              {ride.poster.rating && ride.poster.rating[0] && (
+                <span style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: 700 }}>
+                  ⭐ {Number(ride.poster.rating[0].avg_rating).toFixed(1)} 
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> ({ride.poster.rating[0].review_count})</span>
+                </span>
+              )}
+            </span>
           ) : 'Unknown'}
         </span>
         {ride.pickup_distance_km != null && (

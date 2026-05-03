@@ -19,7 +19,13 @@ router.post('/', async (req, res) => {
   if (pickup_lat == null && dropoff_lat == null) {
     const { data: rides, error } = await supabase
       .from('rides')
-      .select('*, poster:poster_id(id, name, email, phone)')
+      .select(`
+        *, 
+        poster:poster_id(
+          id, name, email, phone,
+          rating:user_ratings!reviewee_id(avg_rating, review_count)
+        )
+      `)
       .eq('status', 'active')
       .order('fare_per_seat', { ascending: true });
 
@@ -30,7 +36,13 @@ router.post('/', async (req, res) => {
   try {
     const { data: rides, error } = await supabase
       .from('rides')
-      .select('*, poster:poster_id(id, name, email, phone)')
+      .select(`
+        *, 
+        poster:poster_id(
+          id, name, email, phone,
+          rating:user_ratings!reviewee_id(avg_rating, review_count)
+        )
+      `)
       .eq('status', 'active')
       .order('fare_per_seat', { ascending: true });
 

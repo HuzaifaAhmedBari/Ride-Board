@@ -2,15 +2,15 @@
 CREATE TABLE public.users (
   id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name          TEXT NOT NULL,
+  email         TEXT UNIQUE NOT NULL,
   phone         TEXT,
-  avatar_url    TEXT,
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Rides posted by any user
 CREATE TABLE public.rides (
   id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  poster_id             UUID NOT NULL REFERENCES public.users(id),
+  poster_id             UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   origin_address        TEXT NOT NULL,
   origin_lat            DOUBLE PRECISION NOT NULL,
   origin_lng            DOUBLE PRECISION NOT NULL,
@@ -18,9 +18,9 @@ CREATE TABLE public.rides (
   destination_lat       DOUBLE PRECISION NOT NULL,
   destination_lng       DOUBLE PRECISION NOT NULL,
   start_time            TIMESTAMPTZ NOT NULL,
-  total_seats           INTEGER NOT NULL CHECK (total_seats BETWEEN 1 AND 8),
+  total_seats           INTEGER NOT NULL CHECK (total_seats >= 1 AND total_seats <= 8),
   seats_remaining       INTEGER NOT NULL,
-  fare_per_seat         NUMERIC(10,2) NOT NULL CHECK (fare_per_seat >= 0),
+  fare_per_seat         NUMERIC NOT NULL CHECK (fare_per_seat >= 0),
   route_polyline        JSONB,       -- GeoJSON LineString from OSRM, may be null
   status                TEXT NOT NULL DEFAULT 'active'
                         CHECK (status IN ('active', 'expired', 'full')),
@@ -34,8 +34,8 @@ CREATE INDEX idx_rides_poster     ON public.rides (poster_id);
 -- Bookings: any user may book any ride they did not post
 CREATE TABLE public.bookings (
   id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  ride_id     UUID NOT NULL REFERENCES public.rides(id),
-  rider_id    UUID NOT NULL REFERENCES public.users(id),
+  ride_id     UUID NOT NULL REFERENCES public.rides(id) ON DELETE CASCADE,
+  rider_id    UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   status      TEXT NOT NULL DEFAULT 'confirmed'
               CHECK (status IN ('confirmed', 'cancelled')),
   created_at  TIMESTAMPTZ DEFAULT NOW(),

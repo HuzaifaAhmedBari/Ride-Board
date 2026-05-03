@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import api from '../api';
 import AddressSearchBox from '../components/AddressSearchBox';
@@ -288,7 +289,20 @@ export default function FindRidePage() {
                 <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                     <span style={{ fontSize: '1.25rem' }}>👤</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text)' }}>{selectedRide.poster?.name || 'Driver'}</span>
+                    {selectedRide.poster ? (
+                      <Link 
+                        to={`/driver/${selectedRide.poster.id}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}
+                        onMouseEnter={e => e.target.style.textDecoration = 'underline'}
+                        onMouseLeave={e => e.target.style.textDecoration = 'none'}
+                      >
+                        {selectedRide.poster.name}
+                      </Link>
+                    ) : (
+                      <span style={{ fontWeight: 600, color: 'var(--text)' }}>Driver</span>
+                    )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', paddingLeft: '1.75rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                     {selectedRide.poster?.phone && <div>📞 {selectedRide.poster.phone}</div>}

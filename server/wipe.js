@@ -10,6 +10,7 @@ async function wipe() {
   
   // Wipe application tables
   await supabase.from('bookings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  await supabase.from('reviews').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('rides').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   await supabase.from('users').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 

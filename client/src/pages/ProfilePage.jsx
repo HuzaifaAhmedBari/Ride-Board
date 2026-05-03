@@ -40,27 +40,35 @@ export default function ProfilePage() {
   
   const [selectedRide, setSelectedRide] = useState(null);
   const [cancelConfirmRide, setCancelConfirmRide] = useState(null);
+  
+  const [activeTab, setActiveTab] = useState('active'); // 'active' | 'completed'
+  const [reviewModal, setReviewModal] = useState(null); // { ride_id, reviewee_id }
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  async function loadData() {
+    setLoading(true);
+    try {
+      const res = await api.get('/users/me');
+      setData({
+        posted_rides: res.data.posted_rides || [],
+        booked_rides: res.data.booked_rides || []
+      });
+      if (res.data.profile) {
+        setEditForm({
+          name: res.data.profile.name || '',
+          phone: res.data.profile.phone || ''
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const res = await api.get('/users/me');
-        setData({
-          posted_rides: res.data.posted_rides || [],
-          booked_rides: res.data.booked_rides || []
-        });
-        if (res.data.profile) {
-          setEditForm({
-            name: res.data.profile.name || '',
-            phone: res.data.profile.phone || ''
-          });
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
@@ -68,7 +76,7 @@ export default function ProfilePage() {
     try {
       await api.patch('/users/me', editForm);
       setEditing(false);
-      window.location.reload();
+      loadData();
     } catch (err) {
       alert('Failed to update profile');
     }
@@ -79,10 +87,7 @@ export default function ProfilePage() {
     const rideId = cancelConfirmRide.id;
     try {
       await api.delete(`/bookings/${rideId}`);
-      setData(prev => ({
-        ...prev,
-        booked_rides: prev.booked_rides.filter(b => b.ride.id !== rideId)
-      }));
+      loadData();
       if (selectedRide?.id === rideId) {
         setSelectedRide(null);
       }
@@ -92,6 +97,28 @@ export default function ProfilePage() {
       setCancelConfirmRide(null);
     }
   }
+
+  const handleSubmitReview = async () => {
+    if (!reviewModal) return;
+    setSubmittingReview(true);
+    try {
+      await api.post('/reviews', {
+        ride_id: reviewModal.ride_id,
+        reviewee_id: reviewModal.reviewee_id,
+        rating: reviewRating,
+        comment: reviewComment
+      });
+      setReviewModal(null);
+      setReviewRating(5);
+      setReviewComment('');
+      // Immediately refresh data so the button disappears
+      await loadData();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) return <div className="container" style={{ padding: '2rem' }}>Loading profile...</div>;
 
@@ -124,10 +151,21 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <h1 className="profile-name">{profile?.name}</h1>
-                <p className="profile-meta">
-                  Member since {new Date(profile?.created_at).toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })}
-                  {profile?.phone && ` • 📞 ${profile.phone}`}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>
+                  <p className="profile-meta" style={{ margin: 0 }}>
+                    Member since {new Date(profile?.created_at).toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })}
+                    {profile?.phone && ` • 📞 ${profile.phone}`}
+                  </p>
+                  {profile?.rating && profile.rating[0] && (
+                    <span style={{ 
+                      background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', 
+                      padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 700,
+                      border: '1px solid rgba(245, 158, 11, 0.2)'
+                    }}>
+                      ⭐ {Number(profile.rating[0].avg_rating).toFixed(1)} ({profile.rating[0].review_count})
+                    </span>
+                  )}
+                </div>
               </div>
               <button className="btn btn-outline-sm" onClick={() => setEditing(!editing)}>
                 {editing ? 'Cancel' : 'Edit Profile'}
@@ -149,58 +187,115 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <h2 className="section-title">My Posted Rides</h2>
-          {data.posted_rides.filter(r => r.status === 'active').length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You have no active posted rides.</p>
-          ) : (
-            <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
-              {data.posted_rides.filter(r => r.status === 'active').map(ride => (
-                <RouteCard 
-                  key={ride.id} 
-                  ride={{...ride, poster: profile}} // inject own profile for posted rides
-                  isSelected={selectedRide?.id === ride.id}
-                  onSelect={setSelectedRide}
-                  showBook={false} 
-                />
-              ))}
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid var(--border)', marginBottom: '2rem' }}>
+            <button 
+              onClick={() => setActiveTab('active')}
+              style={{ 
+                padding: '0.75rem 0', background: 'none', border: 'none', 
+                borderBottom: activeTab === 'active' ? '2px solid var(--primary)' : '2px solid transparent',
+                color: activeTab === 'active' ? 'var(--primary)' : 'var(--text-muted)',
+                fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              Active Rides
+            </button>
+            <button 
+              onClick={() => setActiveTab('completed')}
+              style={{ 
+                padding: '0.75rem 0', background: 'none', border: 'none', 
+                borderBottom: activeTab === 'completed' ? '2px solid var(--primary)' : '2px solid transparent',
+                color: activeTab === 'completed' ? 'var(--primary)' : 'var(--text-muted)',
+                fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              Completed Rides
+            </button>
+          </div>
 
-          <h2 className="section-title" style={{ marginTop: '3rem' }}>My Booked Rides</h2>
-          {data.booked_rides.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You haven't booked any rides yet.</p>
+          {activeTab === 'active' ? (
+            <>
+              <h2 className="section-title">Driving</h2>
+              {data.posted_rides.filter(r => r.status === 'active').length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You have no active posted rides.</p>
+              ) : (
+                <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
+                  {data.posted_rides.filter(r => r.status === 'active').map(ride => (
+                    <RouteCard 
+                      key={ride.id} ride={{...ride, poster: profile}} 
+                      isSelected={selectedRide?.id === ride.id}
+                      onSelect={setSelectedRide} showBook={false} 
+                    />
+                  ))}
+                </div>
+              )}
+              <h2 className="section-title" style={{ marginTop: '3rem' }}>Booked</h2>
+              {data.booked_rides.filter(b => b.ride.status !== 'expired').length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You haven't booked any active rides yet.</p>
+              ) : (
+                <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
+                  {data.booked_rides.filter(b => b.ride.status !== 'expired').map(booking => (
+                    <RouteCard 
+                      key={booking.id} ride={booking.ride} 
+                      isSelected={selectedRide?.id === booking.ride.id}
+                      onSelect={() => setSelectedRide(booking.ride)}
+                      alreadyBooked={true} onCancel={(ride) => setCancelConfirmRide(ride)}
+                      showBook={false}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
-            <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
-              {data.booked_rides.map(booking => (
-                <RouteCard 
-                  key={booking.id} 
-                  ride={booking.ride} 
-                  isSelected={selectedRide?.id === booking.ride.id}
-                  onSelect={() => setSelectedRide(booking.ride)}
-                  alreadyBooked={true}
-                  onCancel={(ride) => setCancelConfirmRide(ride)}
-                  showBook={false} // Don't show book button in ProfilePage
-                />
-              ))}
-            </div>
-          )}
-
-          <h2 className="section-title" style={{ marginTop: '3rem' }}>Completed Rides</h2>
-          {data.posted_rides.filter(r => r.status !== 'active').length === 0 ? (
-            <p style={{ color: 'var(--text-muted)' }}>No completed rides yet.</p>
-          ) : (
-            <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
-              {data.posted_rides.filter(r => r.status !== 'active').map(ride => (
-                <RouteCard 
-                  key={ride.id} 
-                  ride={{...ride, poster: profile}} 
-                  isSelected={selectedRide?.id === ride.id}
-                  onSelect={setSelectedRide}
-                  showBook={false}
-                  isCompleted={true}
-                />
-              ))}
-            </div>
+            <>
+              <h2 className="section-title">Ride History</h2>
+              {(() => {
+                const completed = [
+                  ...data.posted_rides.filter(r => r.status === 'expired').map(r => ({ ...r, role: 'driver', poster: profile })),
+                  ...data.booked_rides.filter(b => b.ride.status === 'expired').map(b => ({ ...b.ride, role: 'passenger', is_reviewed: b.is_reviewed }))
+                ].sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+                if (completed.length === 0) return <p style={{ color: 'var(--text-muted)' }}>No completed rides found.</p>;
+                return (
+                  <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
+                    {completed.map(ride => (
+                      <div key={ride.id} style={{ position: 'relative' }}>
+                        <RouteCard 
+                          ride={ride} isSelected={selectedRide?.id === ride.id}
+                          onSelect={setSelectedRide} isCompleted={true} showBook={false}
+                          hideBadge={true}
+                        />
+                        <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                          <span style={{ 
+                            fontSize: '0.65rem', padding: '0.2rem 0.5rem', borderRadius: '1rem', 
+                            background: ride.role === 'driver' ? '#e0f2fe' : '#fef3c7',
+                            color: ride.role === 'driver' ? '#0369a1' : '#92400e',
+                            fontWeight: 700, textTransform: 'uppercase'
+                          }}>
+                            {ride.role}
+                          </span>
+                          {ride.role === 'passenger' && !ride.is_reviewed && (
+                            <button 
+                              className="btn btn-primary-sm" 
+                              style={{ fontSize: '0.7rem', padding: '0.25rem 0.5rem' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setReviewModal({ ride_id: ride.id, reviewee_id: ride.poster_id });
+                              }}
+                            >
+                              ⭐ Rate Driver
+                            </button>
+                          )}
+                          {ride.role === 'passenger' && ride.is_reviewed && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--green)', fontWeight: 600 }}>
+                              ✓ Reviewed
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </>
           )}
 
         </div>
@@ -272,7 +367,7 @@ export default function ProfilePage() {
                     </span>
                   )}
                 </div>
-                {data.booked_rides.some(b => b.ride.id === selectedRide.id) && (
+                {selectedRide.status === 'active' && data.booked_rides.some(b => b.ride.id === selectedRide.id) && (
                   <button 
                     className="btn btn-primary-sm" 
                     style={{ background: '#ef4444', borderColor: '#ef4444', color: 'white' }}
@@ -304,26 +399,86 @@ export default function ProfilePage() {
               maxWidth: '400px', width: '90%', boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
               border: '1px solid var(--border)'
             }}
-            onClick={e => e.stopPropagation()} // Prevent clicking inside modal from closing it
+            onClick={e => e.stopPropagation()} 
           >
             <h3 style={{ marginTop: 0, fontSize: '1.25rem', color: 'var(--text)' }}>Cancel Booking?</h3>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
               Are you sure you want to cancel your ride with <strong>{cancelConfirmRide.poster?.name || 'this driver'}</strong>? 
-              This will immediately free up your seat for someone else.
             </p>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button className="btn btn-outline-sm" onClick={() => setCancelConfirmRide(null)}>No, Keep it</button>
               <button 
-                className="btn btn-outline"
-                onClick={() => setCancelConfirmRide(null)}
-              >
-                No, Keep it
-              </button>
-              <button 
-                className="btn btn-primary"
+                className="btn btn-primary-sm" 
                 style={{ background: '#ef4444', borderColor: '#ef4444', color: 'white' }}
-                onClick={confirmCancelBooking}
+                onClick={() => confirmCancelBooking(cancelConfirmRide.id)}
               >
-                Yes, Cancel Ride
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {reviewModal && (
+        <div 
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 10000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          onClick={() => setReviewModal(null)}
+        >
+          <div 
+            style={{
+              background: 'var(--bg-card)', padding: '2rem', borderRadius: '16px',
+              maxWidth: '450px', width: '90%', boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+              border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1.5rem'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ textAlign: 'center' }}>
+              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem', color: 'var(--text)' }}>How was your ride?</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Share your experience to help others.</p>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+              {[1, 2, 3, 4, 5].map(num => (
+                <button
+                  key={num}
+                  onClick={() => setReviewRating(num)}
+                  style={{
+                    background: 'none', border: 'none', fontSize: '2rem', cursor: 'pointer',
+                    filter: num <= reviewRating ? 'none' : 'grayscale(100%) opacity(0.3)',
+                    transition: 'transform 0.2s'
+                  }}
+                >
+                  ⭐
+                </button>
+              ))}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Comments (Optional)</label>
+              <textarea 
+                className="form-input" 
+                rows="3" 
+                placeholder="Was the driver on time?"
+                value={reviewComment}
+                onChange={e => setReviewComment(e.target.value)}
+                style={{ resize: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="btn btn-outline-sm" style={{ flex: 1 }} onClick={() => setReviewModal(null)}>Cancel</button>
+              <button 
+                className="btn btn-primary-sm" 
+                style={{ flex: 2 }} 
+                disabled={submittingReview}
+                onClick={handleSubmitReview}
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
               </button>
             </div>
           </div>
