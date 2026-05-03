@@ -150,11 +150,11 @@ export default function ProfilePage() {
           </div>
 
           <h2 className="section-title">My Posted Rides</h2>
-          {data.posted_rides.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You haven't posted any rides yet.</p>
+          {data.posted_rides.filter(r => r.status === 'active').length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You have no active posted rides.</p>
           ) : (
             <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
-              {data.posted_rides.map(ride => (
+              {data.posted_rides.filter(r => r.status === 'active').map(ride => (
                 <RouteCard 
                   key={ride.id} 
                   ride={{...ride, poster: profile}} // inject own profile for posted rides
@@ -168,7 +168,7 @@ export default function ProfilePage() {
 
           <h2 className="section-title" style={{ marginTop: '3rem' }}>My Booked Rides</h2>
           {data.booked_rides.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)' }}>You haven't booked any rides yet.</p>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You haven't booked any rides yet.</p>
           ) : (
             <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
               {data.booked_rides.map(booking => (
@@ -180,6 +180,24 @@ export default function ProfilePage() {
                   alreadyBooked={true}
                   onCancel={(ride) => setCancelConfirmRide(ride)}
                   showBook={false} // Don't show book button in ProfilePage
+                />
+              ))}
+            </div>
+          )}
+
+          <h2 className="section-title" style={{ marginTop: '3rem' }}>Completed Rides</h2>
+          {data.posted_rides.filter(r => r.status !== 'active').length === 0 ? (
+            <p style={{ color: 'var(--text-muted)' }}>No completed rides yet.</p>
+          ) : (
+            <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
+              {data.posted_rides.filter(r => r.status !== 'active').map(ride => (
+                <RouteCard 
+                  key={ride.id} 
+                  ride={{...ride, poster: profile}} 
+                  isSelected={selectedRide?.id === ride.id}
+                  onSelect={setSelectedRide}
+                  showBook={false}
+                  isCompleted={true}
                 />
               ))}
             </div>
@@ -246,7 +264,13 @@ export default function ProfilePage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                  {selectedRide.seats_remaining} seats remaining
+                  {selectedRide.status === 'active' ? (
+                    `${selectedRide.seats_remaining} seats remaining`
+                  ) : (
+                    <span style={{ fontWeight: 600, color: 'var(--primary)' }}>
+                      {selectedRide.total_seats - selectedRide.seats_remaining} riders taken
+                    </span>
+                  )}
                 </div>
                 {data.booked_rides.some(b => b.ride.id === selectedRide.id) && (
                   <button 

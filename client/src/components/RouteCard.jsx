@@ -19,14 +19,16 @@ function SeatDots({ total, remaining }) {
   );
 }
 
-// Props: { ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook }
-export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook = true }) {
+// Props: { ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook, isCompleted }
+export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook = true, isCompleted }) {
   const badge = getStatusBadge(ride);
   const canBook = !alreadyBooked && !isOwnRide && ride.status === 'active' && ride.seats_remaining > 0;
 
   const departure = new Date(ride.start_time);
   const dateStr = departure.toLocaleDateString('en-PK', { weekday: 'short', month: 'short', day: 'numeric' });
   const timeStr = departure.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+
+  const ridersTaken = ride.total_seats - ride.seats_remaining;
 
   return (
     <div
@@ -39,7 +41,7 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
           <span className="route-arrow">→</span>
           <span className="route-dest">{ride.destination_address.split(',')[0]}</span>
         </div>
-        <span className={`badge ${badge.cls}`}>{badge.label}</span>
+        <span className={`badge ${isCompleted ? 'badge-grey' : badge.cls}`}>{isCompleted ? 'Completed' : badge.label}</span>
       </div>
 
       <div className="route-card-meta">
@@ -64,10 +66,16 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
 
       <div className="route-card-details">
         <span className="meta-item">🗓 {dateStr}, {timeStr}</span>
-        <span className="meta-item">
-          <SeatDots total={ride.total_seats} remaining={ride.seats_remaining} />
-          {ride.seats_remaining} seat{ride.seats_remaining !== 1 ? 's' : ''} left
-        </span>
+        {isCompleted ? (
+          <span className="meta-item" style={{ fontWeight: 600, color: 'var(--primary)' }}>
+            {ridersTaken} rider{ridersTaken !== 1 ? 's' : ''} taken
+          </span>
+        ) : (
+          <span className="meta-item">
+            <SeatDots total={ride.total_seats} remaining={ride.seats_remaining} />
+            {ride.seats_remaining} seat{ride.seats_remaining !== 1 ? 's' : ''} left
+          </span>
+        )}
       </div>
 
       <div className="route-card-footer">
