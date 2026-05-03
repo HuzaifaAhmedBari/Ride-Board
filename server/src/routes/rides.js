@@ -62,6 +62,29 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 /**
+ * GET /api/rides/stats
+ * Returns aggregate stats for the home page.
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('rides')
+      .select('seats_remaining')
+      .eq('status', 'active');
+
+    if (error) throw error;
+
+    const stats = {
+      activeRides: data.length,
+      totalSeats: data.reduce((sum, r) => sum + r.seats_remaining, 0)
+    };
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/rides/:id
  * Returns a single ride with poster info. Public — no auth required.
  */

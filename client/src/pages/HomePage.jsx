@@ -1,22 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../api/supabase';
+import api from '../api';
 
 export default function HomePage() {
   const [stats, setStats] = useState({ activeRides: 0, totalSeats: 0 });
 
   useEffect(() => {
     async function loadStats() {
-      const { data } = await supabase
-        .from('rides')
-        .select('id, seats_remaining')
-        .eq('status', 'active');
-      
-      if (data) {
-        setStats({
-          activeRides: data.length,
-          totalSeats: data.reduce((sum, r) => sum + r.seats_remaining, 0)
-        });
+      try {
+        const { data } = await api.get('/rides/stats');
+        if (data) {
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
       }
     }
     loadStats();
