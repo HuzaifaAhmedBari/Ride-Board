@@ -19,8 +19,8 @@ function SeatDots({ total, remaining }) {
   );
 }
 
-// Props: { ride, onSelect, isSelected, onBook, alreadyBooked, isOwnRide, showBook }
-export default function RouteCard({ ride, onSelect, isSelected, onBook, alreadyBooked, isOwnRide, showBook = true }) {
+// Props: { ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook }
+export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook = true }) {
   const badge = getStatusBadge(ride);
   const canBook = !alreadyBooked && !isOwnRide && ride.status === 'active' && ride.seats_remaining > 0;
 
@@ -72,15 +72,26 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, alreadyB
 
       <div className="route-card-footer">
         <span className="fare">PKR {Number(ride.fare_per_seat).toLocaleString()} / seat</span>
-        {showBook && (
-          <button
-            className={`btn ${alreadyBooked ? 'btn-booked' : 'btn-primary-sm'}`}
-            disabled={!canBook}
-            onClick={e => { e.stopPropagation(); onBook && onBook(ride); }}
-          >
-            {alreadyBooked ? '✓ Booked' : isOwnRide ? 'Your Ride' : 'Book'}
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {showBook && (
+            <button
+              className={`btn ${alreadyBooked ? 'btn-booked' : 'btn-primary-sm'}`}
+              disabled={!canBook && !alreadyBooked}
+              onClick={e => { e.stopPropagation(); onBook && onBook(ride); }}
+            >
+              {alreadyBooked ? '✓ Booked' : isOwnRide ? 'Your Ride' : 'Book'}
+            </button>
+          )}
+          {alreadyBooked && onCancel && (
+            <button
+              className="btn btn-primary-sm"
+              style={{ background: '#ef4444', borderColor: '#ef4444', color: 'white' }}
+              onClick={e => { e.stopPropagation(); onCancel(ride); }}
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

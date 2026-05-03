@@ -1,28 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/auth');
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = require('../db');
 
-// GET /api/users/me — own full profile
+/**
+ * GET /api/users/me  [Auth required]
+ * Returns the authenticated user's full profile, posted rides, and bookings.
+ */
 router.get('/me', requireAuth, async (req, res) => {
   const [profileRes, postedRes, bookingsRes] = await Promise.all([
     supabase.from('users').select('*').eq('id', req.user.id).single(),
     supabase.from('rides').select('*').eq('poster_id', req.user.id).order('start_time', { ascending: false }),
-    supabase.from('bookings').select('*, ride:ride_id(*)').eq('rider_id', req.user.id).order('created_at', { ascending: false })
+    supabase.from('bookings').select('*, ride:ride_id(*, poster:poster_id(id, name))').eq('rider_id', req.user.id).order('created_at', { ascending: false })
   ]);
 
   res.json({
-    profile: profileRes.data,
-    posted_rides: postedRes.data || [],
+    profile:      profileRes.data,
+    posted_rides: postedRes.data   || [],
     booked_rides: bookingsRes.data || []
   });
 });
 
-// PATCH /api/users/me — update own profile
+/**
+ * PATCH /api/users/me  [Auth required]
+ * Updates the authenticated user's name and/or phone number.
+ */
 router.patch('/me', requireAuth, async (req, res) => {
   const { name, phone } = req.body;
   const { error } = await supabase
@@ -31,8 +33,11 @@ router.patch('/me', requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// GET /api/users/:id — public driver profile
-router.get('/:id', requireAuth, async (req, res) => {
+/**
+ * GET /api/users/:id  [Public]
+ * Returns a driver's public profile and their active/completed ride counts.
+ */
+router.get('/:id', async (req, res) => {
   const { data: profile, error } = await supabase
     .from('users')
     .select('id, name, created_at')
@@ -51,7 +56,7 @@ router.get('/:id', requireAuth, async (req, res) => {
   res.json({
     profile,
     completed_rides: allRides.filter(r => r.status === 'expired').length,
-    active_rides: allRides.filter(r => r.status === 'active')
+    active_rides:    allRides.filter(r => r.status === 'active')
   });
 });
 

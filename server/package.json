@@ -16,7 +16,6 @@
     "axios": "^1",
     "cors": "^2",
     "dotenv": "^16",
-    "express": "^4",
-    "resend": "^3"
+    "express": "^4"
   }
 }

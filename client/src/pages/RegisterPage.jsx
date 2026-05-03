@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../api/supabase';
 import api from '../api';
+import { useAuthStore } from '../store/authStore';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const refreshProfile = useAuthStore(state => state.refreshProfile);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,7 @@ export default function RegisterPage() {
 
     try {
       await api.post('/auth/profile', { name: formData.name, email: formData.email, phone: formData.phone });
+      await refreshProfile(); // Force refresh to get the newly created profile into global state
       navigate('/find');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create profile');

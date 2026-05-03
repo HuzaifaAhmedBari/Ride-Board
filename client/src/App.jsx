@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from './store/authStore';
-import Navbar           from './components/Navbar';
-import ProtectedRoute   from './components/ProtectedRoute';
-import HomePage         from './pages/HomePage';
-import LoginPage        from './pages/LoginPage';
-import RegisterPage     from './pages/RegisterPage';
-import FindRidePage     from './pages/FindRidePage';
-import PostRidePage     from './pages/PostRidePage';
-import ProfilePage      from './pages/ProfilePage';
-import DriverProfilePage from './pages/DriverProfilePage';
+import { useAuthStore }    from './store/authStore';
+import Navbar              from './components/Navbar';
+import ProtectedRoute      from './components/ProtectedRoute';
+import HomePage            from './pages/HomePage';
+import LoginPage           from './pages/LoginPage';
+import RegisterPage        from './pages/RegisterPage';
+import FindRidePage        from './pages/FindRidePage';
+import PostRidePage        from './pages/PostRidePage';
+import ProfilePage         from './pages/ProfilePage';
+import DriverProfilePage   from './pages/DriverProfilePage';
 
 export default function App() {
   const init = useAuthStore(s => s.init);
