@@ -24,6 +24,15 @@ export default function PostRidePage() {
     setLoading(true);
     setError('');
 
+    // Check if start time is at least 15 minutes in the future
+    const fifteenMinsFromNow = new Date(Date.now() + 15 * 60 * 1000);
+    const selectedTime = new Date(startTime);
+    if (selectedTime < fifteenMinsFromNow) {
+      setError('Departure must be at least 15 minutes from now.');
+      setLoading(false);
+      return;
+    }
+
     try {
       await api.post('/rides', {
         origin_address: origin.address,

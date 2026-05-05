@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import api from '../api';
 import RouteCard from '../components/RouteCard';
+import ChatWindow from '../components/ChatWindow';
+import { useAuthStore } from '../store/authStore';
 
 export default function DriverProfilePage() {
   const { id } = useParams();
+  const { user } = useAuthStore();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [chatRide, setChatRide] = useState(null);
 
   useEffect(() => {
     async function loadDriver() {
@@ -63,13 +64,58 @@ export default function DriverProfilePage() {
         <p style={{ color: 'var(--text-muted)' }}>This driver has no active rides at the moment.</p>
       ) : (
         <div className="rides-grid">
-          {data.active_rides.map(ride => (
-            <RouteCard 
-              key={ride.id} 
-              ride={{ ...ride, poster: data.profile }} 
-              showBook={false} 
+          {data.active_rides.map(ride => {
+            const isBooked = data.my_bookings?.some(b => b.ride_id === ride.id);
+            return (
+              <RouteCard 
+                key={ride.id} 
+                ride={{ ...ride, poster: data.profile }} 
+                showBook={false}
+                alreadyBooked={isBooked}
+                onChat={setChatRide}
+                onSelect={() => {}} // dummy to avoid crash
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* Chat Modal Overlay */}
+      {chatRide && (
+        <div 
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 11000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          onClick={() => setChatRide(null)}
+        >
+          <div 
+            style={{
+              background: 'var(--bg-card)', borderRadius: '16px',
+              width: '95%', maxWidth: '500px', height: '600px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              border: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
+              overflow: 'hidden', position: 'relative'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setChatRide(null)}
+              style={{
+                position: 'absolute', top: '1rem', right: '1rem',
+                background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white',
+                width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer',
+                zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+            <ChatWindow 
+              rideId={chatRide.id} 
+              rideTitle={`${chatRide.origin_address.split(',')[0]} to ${chatRide.destination_address.split(',')[0]}`} 
             />
-          ))}
+          </div>
         </div>
       )}
       <h2 className="section-title" style={{ marginTop: '3rem' }}>Reviews & Feedback</h2>

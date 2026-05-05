@@ -21,6 +21,7 @@ app.use('/api/search',   require('./routes/search'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/users',    require('./routes/users'));
 app.use('/api/reviews',  require('./routes/reviews'));
+app.use('/api/messages', require('./routes/messages'));
 
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 4000;

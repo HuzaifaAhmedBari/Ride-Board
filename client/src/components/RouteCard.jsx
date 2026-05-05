@@ -19,8 +19,8 @@ function SeatDots({ total, remaining }) {
   );
 }
 
-// Props: { ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook, isCompleted, hideBadge }
-export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, alreadyBooked, isOwnRide, showBook = true, isCompleted, hideBadge }) {
+// Props: { ride, onSelect, isSelected, onBook, onCancel, onChat, alreadyBooked, isOwnRide, showBook, isCompleted, hideBadge }
+export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, onChat, alreadyBooked, isOwnRide, showBook = true, isCompleted, hideBadge }) {
   const badge = getStatusBadge(ride);
   const canBook = !alreadyBooked && !isOwnRide && ride.status === 'active' && ride.seats_remaining > 0;
 
@@ -107,6 +107,15 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
               onClick={e => { e.stopPropagation(); onCancel(ride); }}
             >
               Cancel
+            </button>
+          )}
+          {(alreadyBooked || isOwnRide) && !isCompleted && (
+            <button
+              className="btn btn-primary-sm"
+              style={{ background: 'var(--amber)', borderColor: 'var(--amber)', color: 'white' }}
+              onClick={e => { e.stopPropagation(); onSelect(ride); /* This ensures the card is selected */ if (typeof onChat === 'function') onChat(ride); }}
+            >
+              💬 Chat
             </button>
           )}
         </div>

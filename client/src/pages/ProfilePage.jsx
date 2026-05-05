@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet
 import L from 'leaflet';
 import api from '../api';
 import RouteCard from '../components/RouteCard';
+import ChatWindow from '../components/ChatWindow';
 import { useAuthStore } from '../store/authStore';
 
 const blueIcon = new L.Icon.Default();
@@ -33,13 +34,14 @@ function MapUpdater({ selectedRide }) {
 
 export default function ProfilePage() {
   const { profile } = useAuthStore();
-  const [data, setData] = useState({ posted_rides: [], booked_rides: [] });
+  const [data, setData] = useState({ posted_rides: [], posted_active: [], posted_expired: [], booked_rides: [] });
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', phone: '' });
   
   const [selectedRide, setSelectedRide] = useState(null);
   const [cancelConfirmRide, setCancelConfirmRide] = useState(null);
+  const [chatRide, setChatRide] = useState(null);
   
   const [activeTab, setActiveTab] = useState('active'); // 'active' | 'completed'
   const [reviewModal, setReviewModal] = useState(null); // { ride_id, reviewee_id }
@@ -53,6 +55,8 @@ export default function ProfilePage() {
       const res = await api.get('/users/me');
       setData({
         posted_rides: res.data.posted_rides || [],
+        posted_active: res.data.posted_active || [],
+        posted_expired: res.data.posted_expired || [],
         booked_rides: res.data.booked_rides || []
       });
       if (res.data.profile) {
@@ -215,31 +219,34 @@ export default function ProfilePage() {
           {activeTab === 'active' ? (
             <>
               <h2 className="section-title">Driving</h2>
-              {data.posted_rides.filter(r => r.status === 'active').length === 0 ? (
+              {data.posted_active.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You have no active posted rides.</p>
               ) : (
                 <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
-                  {data.posted_rides.filter(r => r.status === 'active').map(ride => (
+                  {data.posted_active.map(ride => (
                     <RouteCard 
                       key={ride.id} ride={{...ride, poster: profile}} 
                       isSelected={selectedRide?.id === ride.id}
-                      onSelect={setSelectedRide} showBook={false} 
+                      onSelect={setSelectedRide} showBook={false}
+                      isOwnRide={true}
+                      onChat={setChatRide}
                     />
                   ))}
                 </div>
               )}
               <h2 className="section-title" style={{ marginTop: '3rem' }}>Booked</h2>
-              {data.booked_rides.filter(b => b.ride.status !== 'expired').length === 0 ? (
+              {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>You haven't booked any active rides yet.</p>
               ) : (
                 <div className="rides-grid" style={selectedRide ? { gridTemplateColumns: '1fr' } : {}}>
-                  {data.booked_rides.filter(b => b.ride.status !== 'expired').map(booking => (
+                  {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).map(booking => (
                     <RouteCard 
                       key={booking.id} ride={booking.ride} 
                       isSelected={selectedRide?.id === booking.ride.id}
                       onSelect={() => setSelectedRide(booking.ride)}
                       alreadyBooked={true} onCancel={(ride) => setCancelConfirmRide(ride)}
                       showBook={false}
+                      onChat={setChatRide}
                     />
                   ))}
                 </div>
@@ -250,8 +257,8 @@ export default function ProfilePage() {
               <h2 className="section-title">Ride History</h2>
               {(() => {
                 const completed = [
-                  ...data.posted_rides.filter(r => r.status === 'expired').map(r => ({ ...r, role: 'driver', poster: profile })),
-                  ...data.booked_rides.filter(b => b.ride.status === 'expired').map(b => ({ ...b.ride, role: 'passenger', is_reviewed: b.is_reviewed }))
+                  ...data.posted_expired.map(r => ({ ...r, role: 'driver', poster: profile })),
+                  ...data.booked_rides.filter(b => b.ride.status === 'expired' || new Date(b.ride.start_time) <= new Date()).map(b => ({ ...b.ride, role: 'passenger', is_reviewed: b.is_reviewed }))
                 ].sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
                 if (completed.length === 0) return <p style={{ color: 'var(--text-muted)' }}>No completed rides found.</p>;
                 return (
@@ -378,7 +385,45 @@ export default function ProfilePage() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      )}
 
+      {/* Chat Modal Overlay */}
+      {chatRide && (
+        <div 
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 11000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          onClick={() => setChatRide(null)}
+        >
+          <div 
+            style={{
+              background: 'var(--bg-card)', borderRadius: '16px',
+              width: '95%', maxWidth: '500px', height: '600px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+              border: '1px solid var(--border)', display: 'flex', flexDirection: 'column',
+              overflow: 'hidden', position: 'relative'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setChatRide(null)}
+              style={{
+                position: 'absolute', top: '1rem', right: '1rem',
+                background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white',
+                width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer',
+                zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+            <ChatWindow 
+              rideId={chatRide.id} 
+              rideTitle={`${chatRide.origin_address.split(',')[0]} to ${chatRide.destination_address.split(',')[0]}`} 
+            />
           </div>
         </div>
       )}

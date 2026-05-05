@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../api/supabase';
+import { setAuthToken } from '../api/tokenStore';
 import api from '../api';
 
 export const useAuthStore = create(set => ({
@@ -10,13 +11,14 @@ export const useAuthStore = create(set => ({
   init: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
+      setAuthToken(session.access_token); // make token available synchronously
       try {
         const { data } = await api.get('/users/me');
         set({ user: session.user, profile: data.profile, loading: false });
       } catch (err) {
         if (err.response?.status === 401) {
-          // Session is invalid (e.g., DB was wiped) - force local logout
           await supabase.auth.signOut().catch(() => {});
+          setAuthToken(null);
           set({ user: null, profile: null, loading: false });
         } else {
           set({ user: session.user, profile: null, loading: false });
@@ -25,8 +27,10 @@ export const useAuthStore = create(set => ({
     } else {
       set({ loading: false });
     }
+
     supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
+        setAuthToken(session.access_token); // keep token in sync on every auth change
         try {
           const { data } = await api.get('/users/me');
           set({ user: session.user, profile: data.profile });
@@ -34,6 +38,7 @@ export const useAuthStore = create(set => ({
           set({ user: session.user, profile: null });
         }
       } else {
+        setAuthToken(null);
         set({ user: null, profile: null });
       }
     });
@@ -41,6 +46,7 @@ export const useAuthStore = create(set => ({
 
   signOut: async () => {
     try { await supabase.auth.signOut(); } catch (e) { console.error(e); }
+    setAuthToken(null);
     set({ user: null, profile: null });
   },
 

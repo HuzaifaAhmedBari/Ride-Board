@@ -1,20 +1,18 @@
 import axios from 'axios';
-import { supabase } from './supabase';
+import { getAuthToken } from './tokenStore';
 
-// Base axios instance — baseURL falls back to same-origin /api for Vercel deployment
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api'
 });
 
 /**
- * Attach the Supabase JWT to every request.
- * Routes that don't require auth will simply ignore the header.
- * This approach is simpler than selectively adding the header per-call.
+ * Synchronously attach JWT from the token singleton.
+ * No async, no awaiting Supabase — never hangs.
  */
-api.interceptors.request.use(async (config) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`;
+api.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
