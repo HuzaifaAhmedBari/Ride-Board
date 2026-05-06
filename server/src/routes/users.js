@@ -8,7 +8,8 @@ const supabase = require('../db');
  * Returns the authenticated user's full profile, posted rides, and bookings.
  */
 router.get('/me', requireAuth, async (req, res) => {
-  const now = new Date().toISOString();
+  try {
+    const now = new Date().toISOString();
   const [profileRes, postedRes, bookingsRes, reviewsRes] = await Promise.all([
     supabase.from('users').select('*, rating:user_ratings!reviewee_id(avg_rating, review_count)').eq('id', req.user.id).single(),
     supabase.from('rides').select('*').eq('poster_id', req.user.id).order('start_time', { ascending: false }),
@@ -16,29 +17,24 @@ router.get('/me', requireAuth, async (req, res) => {
     supabase.from('reviews').select('ride_id').eq('reviewer_id', req.user.id)
   ]);
 
-  // Mark booked rides that already have reviews
-  const reviewedRideIds = new Set((reviewsRes.data || []).map(r => r.ride_id));
-  const bookedRides = (bookingsRes.data || []).map(b => ({
-    ...b,
-    is_reviewed: reviewedRideIds.has(b.ride_id)
-  }));
+    const reviewedRideIds = new Set((reviewsRes.data || []).map(r => r.ride_id));
+    const bookedRides = (bookingsRes.data || []).map(b => ({
+      ...b,
+      is_reviewed: reviewedRideIds.has(b.ride_id)
+    }));
 
-  // Split posted rides into active (not yet departed) and expired
-  const postedRides = postedRes.data || [];
-  const activePosted = postedRides.filter(r =>
-    (r.status === 'active' || r.status === 'full') && new Date(r.start_time) > new Date(now)
-  );
-  const expiredPosted = postedRides.filter(r =>
-    r.status === 'expired' || new Date(r.start_time) <= new Date(now)
-  );
-
-  res.json({
-    profile:      profileRes.data,
-    posted_rides: postedRides,
-    posted_active: activePosted,
-    posted_expired: expiredPosted,
-    booked_rides: bookedRides
-  });
+    const postedRides = postedRes.data || [];
+    
+    res.json({
+      profile: profileRes.data,
+      posted_rides: postedRides,
+      posted_active: postedRides.filter(r => (r.status === 'active' || r.status === 'full') && new Date(r.start_time) > new Date()),
+      posted_expired: postedRides.filter(r => r.status === 'expired' || new Date(r.start_time) <= new Date()),
+      booked_rides: bookedRides
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /**
@@ -67,12 +63,14 @@ router.get('/:id', requireAuth, async (req, res) => {
 
   if (profileRes.error) return res.status(404).json({ error: 'User not found' });
 
-  const now = new Date().toISOString();
+  const now = new Date();
   const allRides = ridesRes.data || [];
+  const activeRides = allRides.filter(r => ['active', 'full'].includes(r.status) && new Date(r.start_time) > now);
+  
   res.json({
     profile:         profileRes.data,
-    completed_rides: allRides.filter(r => r.status === 'expired' || new Date(r.start_time) <= new Date(now)).length,
-    active_rides:    allRides.filter(r => (r.status === 'active' || r.status === 'full') && new Date(r.start_time) > new Date(now)),
+    completed_rides: allRides.filter(r => r.status === 'expired' || new Date(r.start_time) <= now).length,
+    active_rides:    activeRides,
     reviews:         reviewsRes.data || [],
     my_bookings:     myBookingsRes.data || []
   });

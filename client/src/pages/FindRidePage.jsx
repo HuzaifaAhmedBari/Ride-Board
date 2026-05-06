@@ -7,6 +7,12 @@ import MapPicker from '../components/MapPicker';
 import RouteCard from '../components/RouteCard';
 import { useAuthStore } from '../store/authStore';
 import L from 'leaflet';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Search, Map as MapIcon, Info, User, Phone, Mail, Navigation2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const redIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -17,13 +23,8 @@ const redIcon = new L.Icon({
 });
 const blueIcon = new L.Icon.Default();
 
-/**
- * Syncs the Leaflet map viewport to the selected ride route or the user's
- * pickup/dropoff pins whenever any of those values change.
- */
 function MapUpdater({ selectedRide, pickup, dropoff }) {
   const map = useMap();
-
   useEffect(() => {
     if (selectedRide) {
       let bounds;
@@ -36,18 +37,10 @@ function MapUpdater({ selectedRide, pickup, dropoff }) {
           [selectedRide.destination_lat, selectedRide.destination_lng]
         ]);
       }
-
       if (pickup)  bounds.extend([pickup.lat,  pickup.lng]);
       if (dropoff) bounds.extend([dropoff.lat, dropoff.lng]);
-
-      // Slight delay ensures the container is fully sized before fitting bounds
       setTimeout(() => {
-        map.fitBounds(bounds, { 
-          paddingTopLeft: [40, 40],
-          paddingBottomRight: [40, 100], // Increased bottom padding to shift route up
-          animate: true, 
-          maxZoom: 15 
-        });
+        map.fitBounds(bounds, { paddingTopLeft: [40, 40], paddingBottomRight: [40, 100], animate: true, maxZoom: 15 });
       }, 50);
     } else if (pickup && dropoff) {
       map.fitBounds(L.latLngBounds([[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]]), { padding: [40, 40] });
@@ -57,29 +50,7 @@ function MapUpdater({ selectedRide, pickup, dropoff }) {
       map.setView([dropoff.lat, dropoff.lng], 13);
     }
   }, [selectedRide, pickup, dropoff, map]);
-
   return null;
-}
-
-/** Modal that overlays a MapPicker so the user can pin a location on a full map. */
-function MapModal({ isOpen, onClose, onConfirm, initialPos }) {
-  const [pos, setPos] = useState(initialPos);
-  useEffect(() => { if (isOpen) setPos(initialPos); }, [isOpen, initialPos]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '1rem', width: '90%', maxWidth: '600px', border: '1px solid var(--border)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)' }}>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text)' }}>Choose from Map</h3>
-        <MapPicker value={pos} onChange={setPos} height={350} />
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', justifyContent: 'flex-end' }}>
-          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={() => onConfirm(pos)} disabled={!pos}>Confirm</button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function FindRidePage() {
@@ -91,23 +62,18 @@ export default function FindRidePage() {
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState('');
   const [bookingError, setBookingError] = useState('');
-  const [mapModalOpen, setMapModalOpen] = useState(null); // 'pickup' | 'dropoff' | null
+  const [mapModalOpen, setMapModalOpen] = useState(null); 
   const [bookedRideIds, setBookedRideIds] = useState(new Set());
 
-  // Load all active rides on mount (and populate already-booked rides)
   useEffect(() => {
     async function loadAll() {
       setLoading(true);
       try {
         const { data: ridesData } = await api.post('/search', {});
         setResults(ridesData);
-
-        // If user is logged in, fetch their profile to find which rides they already booked
         if (user) {
           const { data: userData } = await api.get('/users/me');
-          if (userData?.booked_rides) {
-            setBookedRideIds(new Set(userData.booked_rides.map(b => b.ride_id)));
-          }
+          if (userData?.booked_rides) setBookedRideIds(new Set(userData.booked_rides.map(b => b.ride_id)));
         }
       } catch {
         setError('Failed to load rides');
@@ -122,18 +88,11 @@ export default function FindRidePage() {
     setLoading(true);
     setError('');
     setSelectedRide(null);
-
-    const payload = (pickup && dropoff) ? {
-      pickup_lat: pickup.lat, pickup_lng: pickup.lng,
-      dropoff_lat: dropoff.lat, dropoff_lng: dropoff.lng
-    } : {};
-
+    const payload = (pickup && dropoff) ? { pickup_lat: pickup.lat, pickup_lng: pickup.lng, dropoff_lat: dropoff.lat, dropoff_lng: dropoff.lng } : {};
     try {
       const { data } = await api.post('/search', payload);
       setResults(data);
-      if (data.length === 0 && payload.pickup_lat) {
-        setError('No rides found near these locations.');
-      }
+      if (data.length === 0 && payload.pickup_lat) setError('No rides found near these locations.');
     } catch (err) {
       setError(err.response?.data?.error || 'Search failed');
     } finally {
@@ -145,211 +104,175 @@ export default function FindRidePage() {
     setBookingError('');
     try {
       await api.post('/bookings', { ride_id: ride.id });
-
-      // Optimistically update local state
       setBookedRideIds(prev => new Set(prev).add(ride.id));
-      setResults(prev => prev.map(r =>
-        r.id === ride.id
-          ? { ...r, seats_remaining: r.seats_remaining - 1, status: r.seats_remaining - 1 === 0 ? 'full' : 'active' }
-          : r
-      ));
-      // Email notifications are sent server-side in POST /api/bookings
+      setResults(prev => prev.map(r => r.id === ride.id ? { ...r, seats_remaining: r.seats_remaining - 1, status: r.seats_remaining - 1 === 0 ? 'full' : 'active' } : r));
     } catch (err) {
       const errorMsg = err.response?.data?.error || '';
-      if (errorMsg.includes('bookings_ride_id_rider_id_key')) {
-        setBookingError('You have already booked this ride.');
-      } else {
-        setBookingError(errorMsg || 'Booking failed');
-      }
+      setBookingError(errorMsg.includes('bookings_ride_id_rider_id_key') ? 'You have already booked this ride.' : (errorMsg || 'Booking failed'));
     }
   }
 
-  const polylineCoords = selectedRide?.route_polyline?.coordinates
-    ? selectedRide.route_polyline.coordinates.map(c => [c[1], c[0]])
-    : [];
+  const polylineCoords = selectedRide?.route_polyline?.coordinates?.map(c => [c[1], c[0]]) || [];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 65px)', overflow: 'hidden' }}>
-      <MapModal
-        isOpen={!!mapModalOpen}
-        initialPos={mapModalOpen === 'pickup' ? pickup : dropoff}
-        onClose={() => setMapModalOpen(null)}
-        onConfirm={(pos) => {
-          if (mapModalOpen === 'pickup')  setPickup(pos);
-          if (mapModalOpen === 'dropoff') setDropoff(pos);
-          setMapModalOpen(null);
-        }}
-      />
+    <div className="flex flex-col h-[calc(100vh-65px)] bg-slate-950 overflow-hidden">
+      <Dialog open={!!mapModalOpen} onOpenChange={() => setMapModalOpen(null)}>
+        <DialogContent showCloseButton={false} className="max-w-4xl h-[80vh] p-0 bg-slate-900 border-slate-800 text-white overflow-hidden">
+          <MapPicker 
+            label={`Select ${mapModalOpen === 'pickup' ? 'Pickup' : 'Dropoff'} Location`}
+            value={mapModalOpen === 'pickup' ? pickup : dropoff} 
+            onChange={(pos) => {
+              if (mapModalOpen === 'pickup')  setPickup(pos);
+              if (mapModalOpen === 'dropoff') setDropoff(pos);
+              setMapModalOpen(null);
+            }} 
+            onCancel={() => setMapModalOpen(null)}
+          />
+        </DialogContent>
+      </Dialog>
 
-      <div className="split-view" style={{ flex: 1, height: '100%', minHeight: 0, overflow: 'hidden' }}>
-
-        {/* LEFT COLUMN: Search & Results */}
-        <div className="split-left" style={{ width: '35%', height: '100%', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border)', padding: '1rem' }}>
-
-          {/* Search controls (fixed at top) */}
-          <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>Book a Ride</h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ flex: 1 }}>
-                  <AddressSearchBox placeholder="Enter Pickup" onSelect={setPickup} value={pickup?.address} />
-                </div>
-                <button className="btn btn-outline" style={{ whiteSpace: 'nowrap', padding: '0.4rem 0.75rem', fontSize: '0.875rem' }} onClick={() => setMapModalOpen('pickup')}>
-                  🗺️ Map
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{ flex: 1 }}>
-                  <AddressSearchBox placeholder="Enter Dropoff" onSelect={setDropoff} value={dropoff?.address} />
-                </div>
-                <button className="btn btn-outline" style={{ whiteSpace: 'nowrap', padding: '0.4rem 0.75rem', fontSize: '0.875rem' }} onClick={() => setMapModalOpen('dropoff')}>
-                  🗺️ Map
-                </button>
-              </div>
+      <div className="flex flex-1 overflow-hidden">
+        {/* LEFT COLUMN */}
+        <aside className="w-full md:w-[400px] border-r border-slate-800 flex flex-col bg-slate-900/50 backdrop-blur-sm z-20">
+          <div className="p-4 space-y-4 border-b border-slate-800">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Search className="w-5 h-5 text-violet-500" />
+                Find a Ride
+              </h2>
             </div>
-
-            <button
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '0.6rem', fontWeight: 'bold', fontSize: '0.875rem' }}
-              disabled={loading}
-              onClick={handleSearch}
-            >
-              {loading ? 'Searching...' : 'FIND RIDE OFFERS'}
-            </button>
-
-            {error && <div className="form-error" style={{ marginTop: '0.5rem', textAlign: 'center', fontSize: '0.875rem' }}>{error}</div>}
-          </div>
-
-          {/* Scrollable ride cards */}
-          <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.25rem' }}>
-            {bookingError && <div className="toast toast-error">{bookingError}</div>}
-
-            <div className="results-list">
-              {results.length === 0 && !loading && !error && (
-                <div className="empty-state" style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.875rem' }}>No rides available right now.</div>
-              )}
-
-              {results.map(ride => (
-                <RouteCard
-                  key={ride.id}
-                  ride={ride}
-                  isSelected={selectedRide?.id === ride.id}
-                  onSelect={setSelectedRide}
-                  onBook={handleBook}
-                  alreadyBooked={bookedRideIds.has(ride.id)}
-                  isOwnRide={ride.poster_id === user?.id}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Map & selected ride details */}
-        <div className="split-right" style={{ width: '65%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, position: 'relative', minHeight: '200px' }}>
-            <MapContainer
-              center={[24.8607, 67.0011]}
-              zoom={11}
-              style={{ width: '100%', height: '100%', borderRadius: 0 }}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
-              <MapUpdater selectedRide={selectedRide} pickup={pickup} dropoff={dropoff} />
-
-              {/* User's desired pickup/dropoff (red markers) */}
-              {pickup  && <Marker position={[pickup.lat,  pickup.lng]}  icon={redIcon} />}
-              {dropoff && <Marker position={[dropoff.lat, dropoff.lng]} icon={redIcon} />}
-
-              {/* Selected ride's actual route */}
-              {selectedRide && (
-                <>
-                  <Marker position={[selectedRide.origin_lat,      selectedRide.origin_lng]}      icon={blueIcon} />
-                  <Marker position={[selectedRide.destination_lat, selectedRide.destination_lng]} icon={blueIcon} />
-                  {polylineCoords.length > 0 && (
-                    <Polyline positions={polylineCoords} color="#3b82f6" weight={5} opacity={0.8} />
-                  )}
-                </>
-              )}
-            </MapContainer>
-          </div>
-
-          {/* Detail panel below the map */}
-          <div style={{ flex: 'none', padding: '1rem 1.5rem', background: 'var(--bg-card)', borderTop: '1px solid var(--border)' }}>
-            {!selectedRide ? (
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '1rem 0' }}>
-                <p style={{ fontWeight: 500 }}>Set your route and find rides.</p>
-                <p style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>Select an offer on the left to view details.</p>
+            
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <AddressSearchBox placeholder="Pickup Location" onSelect={setPickup} value={pickup?.address} />
+                </div>
+                <Button variant="outline" size="icon" onClick={() => setMapModalOpen('pickup')} className="border-slate-800 hover:bg-slate-800">
+                  <MapIcon className="w-4 h-4" />
+                </Button>
               </div>
-            ) : (
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <AddressSearchBox placeholder="Dropoff Location" onSelect={setDropoff} value={dropoff?.address} />
+                </div>
+                <Button variant="outline" size="icon" onClick={() => setMapModalOpen('dropoff')} className="border-slate-800 hover:bg-slate-800">
+                  <MapIcon className="w-4 h-4" />
+                </Button>
+              </div>
+              <Button onClick={handleSearch} disabled={loading} className="w-full bg-violet-600 hover:bg-violet-500 font-bold">
+                {loading ? 'Searching...' : 'Search Rides'}
+              </Button>
+            </div>
+            {error && <p className="text-xs text-red-400 text-center font-medium animate-pulse">{error}</p>}
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+            <AnimatePresence mode="popLayout">
+              {loading ? (
+                [1,2,3].map(i => <Skeleton key={i} className="h-[180px] w-full rounded-xl bg-slate-800" />)
+              ) : results.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-500 space-y-2 text-center">
+                  <Info className="w-12 h-12 opacity-20" />
+                  <p className="font-medium text-slate-400">No rides available right now</p>
+                  <p className="text-sm">Try adjusting your search or check back later</p>
+                </div>
+              ) : (
+                results.map((ride) => (
+                  <RouteCard
+                    key={ride.id}
+                    ride={ride}
+                    isSelected={selectedRide?.id === ride.id}
+                    onSelect={setSelectedRide}
+                    onBook={handleBook}
+                    alreadyBooked={bookedRideIds.has(ride.id)}
+                    isOwnRide={ride.poster_id === user?.id}
+                  />
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+        </aside>
+
+        {/* RIGHT COLUMN (MAP) */}
+        <main className="flex-1 relative bg-slate-900">
+          <MapContainer center={[24.8607, 67.0011]} zoom={11} className="h-full w-full grayscale-[0.2] contrast-[1.1]">
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
+            <MapUpdater selectedRide={selectedRide} pickup={pickup} dropoff={dropoff} />
+            {pickup  && <Marker position={[pickup.lat,  pickup.lng]}  icon={redIcon} />}
+            {dropoff && <Marker position={[dropoff.lat, dropoff.lng]} icon={redIcon} />}
+            {selectedRide && (
               <>
-                <h3 style={{ marginBottom: '0.75rem', color: 'var(--text)', fontSize: '1.125rem' }}>Ride Details</h3>
-
-                {/* Driver info */}
-                <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                    <span style={{ fontSize: '1.25rem' }}>👤</span>
-                    {selectedRide.poster ? (
-                      <Link 
-                        to={`/driver/${selectedRide.poster.id}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        style={{ fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}
-                        onMouseEnter={e => e.target.style.textDecoration = 'underline'}
-                        onMouseLeave={e => e.target.style.textDecoration = 'none'}
-                      >
-                        {selectedRide.poster.name}
-                      </Link>
-                    ) : (
-                      <span style={{ fontWeight: 600, color: 'var(--text)' }}>Driver</span>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', paddingLeft: '1.75rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                    {selectedRide.poster?.phone && <div>📞 {selectedRide.poster.phone}</div>}
-                    {selectedRide.poster?.email && <div>✉️ {selectedRide.poster.email}</div>}
-                  </div>
-                </div>
-
-                {/* Route summary */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>
-                  <div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Driver Start</p>
-                    <p style={{ fontWeight: 500, color: 'var(--text)', fontSize: '0.875rem' }}>{selectedRide.origin_address.split(',')[0]}</p>
-                  </div>
-                  <div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Driver End</p>
-                    <p style={{ fontWeight: 500, color: 'var(--text)', fontSize: '0.875rem' }}>{selectedRide.destination_address.split(',')[0]}</p>
-                  </div>
-                </div>
-
-                {/* Fare & book button */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
-                  <div>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary)' }}>
-                      PKR {selectedRide.fare_per_seat}
-                    </span>
-                    <span style={{ color: 'var(--text-muted)', marginLeft: '0.25rem', fontSize: '0.875rem' }}> / seat</span>
-                  </div>
-
-                  <button
-                    className={`btn ${bookedRideIds.has(selectedRide.id) ? 'btn-booked' : 'btn-primary'}`}
-                    disabled={bookedRideIds.has(selectedRide.id) || selectedRide.poster_id === user?.id || selectedRide.seats_remaining === 0}
-                    onClick={() => handleBook(selectedRide)}
-                    style={{ minWidth: '120px', padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                  >
-                    {bookedRideIds.has(selectedRide.id)
-                      ? '✓ Booked'
-                      : selectedRide.poster_id === user?.id
-                        ? 'Your Ride'
-                        : selectedRide.seats_remaining === 0
-                          ? 'Full'
-                          : 'Book Now'}
-                  </button>
-                </div>
+                <Marker position={[selectedRide.origin_lat,      selectedRide.origin_lng]}      icon={blueIcon} />
+                <Marker position={[selectedRide.destination_lat, selectedRide.destination_lng]} icon={blueIcon} />
+                {polylineCoords.length > 0 && <Polyline positions={polylineCoords} color="#3b82f6" weight={5} opacity={0.8} />}
               </>
             )}
-          </div>
-        </div>
+          </MapContainer>
+
+          {/* RIDE DETAIL FLOATING PANEL */}
+          <AnimatePresence>
+            {selectedRide && (
+              <motion.div 
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                className="absolute bottom-6 left-6 right-6 z-[1000] md:left-auto md:w-[400px]"
+              >
+                <Card className="bg-slate-900/90 border-slate-700 backdrop-blur-lg shadow-2xl">
+                  <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                    <CardTitle className="text-white text-lg">Selected Ride</CardTitle>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedRide(null)} className="h-8 w-8 text-slate-400 hover:text-white">×</Button>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-violet-500/10 rounded-lg border border-violet-500/20">
+                      <div className="w-10 h-10 bg-violet-600 rounded-full flex items-center justify-center">
+                        <User className="text-white w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Link 
+                          to={`/driver/${selectedRide.poster?.id}`} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-violet-400 font-bold hover:underline block truncate"
+                        >
+                          {selectedRide.poster?.name || 'Driver'}
+                        </Link>
+                        <div className="flex gap-3 text-xs text-slate-400 mt-1">
+                          {selectedRide.poster?.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3"/> {selectedRide.poster.phone}</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">From</p>
+                        <p className="text-sm text-slate-200 font-medium truncate">{selectedRide.origin_address.split(',')[0]}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">To</p>
+                        <p className="text-sm text-slate-200 font-medium truncate">{selectedRide.destination_address.split(',')[0]}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                      <div className="text-2xl font-black text-violet-400">
+                        PKR {selectedRide.fare_per_seat}
+                        <span className="text-xs text-slate-500 font-normal ml-1">/ seat</span>
+                      </div>
+                      <Button
+                        disabled={bookedRideIds.has(selectedRide.id) || selectedRide.poster_id === user?.id || selectedRide.seats_remaining === 0}
+                        onClick={() => handleBook(selectedRide)}
+                        className={`font-bold ${bookedRideIds.has(selectedRide.id) ? 'bg-emerald-600' : 'bg-violet-600 hover:bg-violet-500'}`}
+                      >
+                        {bookedRideIds.has(selectedRide.id) ? '✓ Booked' : 'Book Now'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
       </div>
     </div>
   );

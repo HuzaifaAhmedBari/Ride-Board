@@ -11,15 +11,15 @@ router.get('/:ride_id', requireAuth, async (req, res) => {
   const { ride_id } = req.params;
 
   try {
-    // Verify user is authorized (driver or passenger)
     const { data: ride } = await supabase.from('rides').select('poster_id').eq('id', ride_id).single();
-    const { data: booking } = await supabase.from('bookings').select('id').eq('ride_id', ride_id).eq('rider_id', req.user.id).single();
-
     if (!ride) return res.status(404).json({ error: 'Ride not found' });
+
+    const { data: booking } = await supabase.from('bookings').select('id').eq('ride_id', ride_id).eq('rider_id', req.user.id).single();
     if (ride.poster_id !== req.user.id && !booking) {
       return res.status(403).json({ error: 'You are not authorized to view messages for this ride' });
     }
 
+    // Fetch messages with sender names
     const { data: messages, error } = await supabase
       .from('messages')
       .select('*, sender:sender_id(name)')
@@ -27,7 +27,26 @@ router.get('/:ride_id', requireAuth, async (req, res) => {
       .order('created_at', { ascending: true });
 
     if (error) throw error;
-    res.json(messages);
+
+    // Fetch booking statuses for all riders in this ride to identify cancelled ones
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('rider_id, status')
+      .eq('ride_id', ride_id);
+
+    const bookingMap = {};
+    if (bookings) {
+      bookings.forEach(b => {
+        bookingMap[b.rider_id] = b.status;
+      });
+    }
+
+    const enhancedMessages = messages.map(m => ({
+      ...m,
+      sender_status: m.sender_id === ride.poster_id ? 'driver' : (bookingMap[m.sender_id] || 'unknown')
+    }));
+
+    res.json(enhancedMessages);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

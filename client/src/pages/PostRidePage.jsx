@@ -3,11 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import AddressSearchBox from '../components/AddressSearchBox';
 import MapPicker from '../components/MapPicker';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Car, MapPin, Calendar, Users, Banknote, ArrowRight, Loader2, Navigation2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PostRidePage() {
   const navigate = useNavigate();
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
+  const [activePicking, setActivePicking] = useState('origin'); // 'origin' or 'destination'
   const [startTime, setStartTime] = useState('');
   const [seats, setSeats] = useState(1);
   const [fare, setFare] = useState(0);
@@ -17,17 +24,15 @@ export default function PostRidePage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!origin || !destination) {
-      setError('Please place pins for both origin and destination.');
+      setError('Please select both origin and destination.');
       return;
     }
     
     setLoading(true);
     setError('');
 
-    // Check if start time is at least 15 minutes in the future
     const fifteenMinsFromNow = new Date(Date.now() + 15 * 60 * 1000);
-    const selectedTime = new Date(startTime);
-    if (selectedTime < fifteenMinsFromNow) {
+    if (new Date(startTime) < fifteenMinsFromNow) {
       setError('Departure must be at least 15 minutes from now.');
       setLoading(false);
       return;
@@ -45,8 +50,7 @@ export default function PostRidePage() {
         total_seats: parseInt(seats, 10),
         fare_per_seat: parseFloat(fare)
       });
-      
-      navigate('/find', { state: { message: 'Your ride is live!' } });
+      navigate('/find');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to post ride');
       setLoading(false);
@@ -54,71 +58,186 @@ export default function PostRidePage() {
   }
 
   return (
-    <div className="container">
-      <div className="post-form-container">
-        <h2 className="post-title">Post a Ride</h2>
-        {error && <div className="toast toast-error">{error}</div>}
+    <div className="min-h-[calc(100vh-65px)] bg-slate-950 p-6 md:p-12 overflow-y-auto">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Origin</label>
-            <AddressSearchBox placeholder="Search origin..." onSelect={setOrigin} value={origin?.address} />
-            <MapPicker value={origin} onChange={setOrigin} height={200} />
-          </div>
+        {/* Left: Form (5 columns) */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="lg:col-span-5"
+        >
+          <Card className="bg-slate-900 border-slate-800 shadow-2xl sticky top-4">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                <Car className="text-violet-500 w-6 h-6" />
+                Post a New Ride
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-4">
+                  <div className={`p-4 rounded-xl border transition-all ${activePicking === 'origin' ? 'bg-violet-500/5 border-violet-500/30 ring-1 ring-violet-500/20' : 'bg-slate-800/50 border-slate-700'}`} onClick={() => setActivePicking('origin')}>
+                    <Label className="text-slate-400 mb-2 block flex items-center justify-between">
+                      Origin Location
+                      {activePicking === 'origin' && <span className="text-[10px] bg-violet-600 text-white px-2 py-0.5 rounded-full uppercase">Picking on Map</span>}
+                    </Label>
+                    <AddressSearchBox placeholder="Where are you starting?" onSelect={setOrigin} value={origin?.address} />
+                  </div>
 
-          <div className="form-group">
-            <label className="form-label">Destination</label>
-            <AddressSearchBox placeholder="Search destination..." onSelect={setDestination} value={destination?.address} />
-            <MapPicker value={destination} onChange={setDestination} height={200} />
-          </div>
+                  <div className={`p-4 rounded-xl border transition-all ${activePicking === 'destination' ? 'bg-violet-500/5 border-violet-500/30 ring-1 ring-violet-500/20' : 'bg-slate-800/50 border-slate-700'}`} onClick={() => setActivePicking('destination')}>
+                    <Label className="text-slate-400 mb-2 block flex items-center justify-between">
+                      Destination Location
+                      {activePicking === 'destination' && <span className="text-[10px] bg-violet-600 text-white px-2 py-0.5 rounded-full uppercase">Picking on Map</span>}
+                    </Label>
+                    <AddressSearchBox placeholder="Where are you going?" onSelect={setDestination} value={destination?.address} />
+                  </div>
+                </div>
 
-          <div className="form-group">
-            <label className="form-label">Departure Date & Time</label>
-            <input
-              type="datetime-local"
-              required
-              className="form-input"
-              value={startTime}
-              onChange={e => setStartTime(e.target.value)}
-              min={new Date(Date.now() + 15 * 60000).toISOString().slice(0, 16)}
-            />
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-violet-400" /> Departure
+                    </Label>
+                    <Input
+                      type="datetime-local"
+                      required
+                      className="bg-slate-800 border-slate-700 text-white"
+                      value={startTime}
+                      onChange={e => setStartTime(e.target.value)}
+                      min={new Date(Date.now() + 15 * 60000).toISOString().slice(0, 16)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-400 flex items-center gap-2">
+                      <Users className="w-4 h-4 text-indigo-400" /> Available Seats
+                    </Label>
+                    <Input
+                      type="number"
+                      required
+                      min="1"
+                      max="6"
+                      className="bg-slate-800 border-slate-700 text-white"
+                      value={seats}
+                      onChange={e => {
+                        const val = parseInt(e.target.value, 10);
+                        if (val > 6) setSeats(6);
+                        else if (val < 1) setSeats(1);
+                        else setSeats(e.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
 
-          <div className="form-group">
-            <label className="form-label">Available Seats (1-8)</label>
-            <input
-              type="number"
-              required
-              min="1"
-              max="8"
-              className="form-input"
-              value={seats}
-              onChange={e => setSeats(e.target.value)}
-            />
-          </div>
+                <div className="space-y-2">
+                  <Label className="text-slate-400 flex items-center gap-2">
+                    <Banknote className="w-4 h-4 text-emerald-500" /> Fare per Seat (PKR)
+                  </Label>
+                  <Input
+                    type="number"
+                    required
+                    min="0"
+                    step="10"
+                    className="bg-slate-800 border-slate-700 text-white text-lg font-bold"
+                    value={fare}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      if (val < 0) setFare(0);
+                      else setFare(e.target.value);
+                    }}
+                  />
+                </div>
 
-          <div className="form-group">
-            <label className="form-label">Fare per Seat (PKR)</label>
-            <input
-              type="number"
-              required
-              min="0"
-              step="10"
-              className="form-input"
-              value={fare}
-              onChange={e => setFare(e.target.value)}
-            />
-          </div>
+                {error && <p className="text-sm text-red-400 font-medium">{error}</p>}
 
-          <button 
-            type="submit" 
-            className="btn btn-primary" 
-            style={{ width: '100%', marginTop: '1rem' }}
-            disabled={loading}
-          >
-            {loading ? 'Posting...' : 'Post Ride'}
-          </button>
-        </form>
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-lg font-bold shadow-lg shadow-violet-600/20"
+                  disabled={loading}
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm & Post Ride'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Right: Map Picker (7 columns) */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="lg:col-span-7 space-y-4"
+        >
+          <div className="h-full flex flex-col gap-4">
+            <Card className="bg-slate-900 border-slate-800 overflow-hidden flex-1 min-h-[500px] flex flex-col">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-sm font-medium text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Navigation2 className="w-4 h-4 text-violet-500" />
+                    Interactive Map Selection
+                  </CardTitle>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={activePicking === 'origin' ? 'default' : 'outline'} 
+                    size="sm" 
+                    onClick={() => setActivePicking('origin')}
+                    className={activePicking === 'origin' ? 'bg-violet-600' : 'border-slate-700 text-slate-400'}
+                  >
+                    Set Origin
+                  </Button>
+                  <Button 
+                    variant={activePicking === 'destination' ? 'default' : 'outline'} 
+                    size="sm" 
+                    onClick={() => setActivePicking('destination')}
+                    className={activePicking === 'destination' ? 'bg-violet-600' : 'border-slate-700 text-slate-400'}
+                  >
+                    Set Destination
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 flex-1 relative border-t border-slate-800">
+                <MapPicker 
+                  key={activePicking} // Remount map when switching mode to reset temp selection
+                  label={activePicking === 'origin' ? "Select Starting Point" : "Select Destination Point"}
+                  value={activePicking === 'origin' ? origin : destination} 
+                  onChange={(val) => {
+                    if (activePicking === 'origin') {
+                      setOrigin(val);
+                      if (!destination) setActivePicking('destination');
+                    } else {
+                      setDestination(val);
+                    }
+                  }} 
+                  height="100%" 
+                  confirmRequired={false}
+                />
+              </CardContent>
+            </Card>
+
+            {origin && destination && (
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+                <Card className="bg-violet-600/10 border-violet-600/20">
+                  <CardContent className="p-4 flex items-center justify-between text-white">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] uppercase font-bold text-violet-400">Planned Route</p>
+                      <div className="flex items-center gap-2 text-sm mt-1">
+                        <span className="truncate">{origin.address.split(',')[0]}</span>
+                        <ArrowRight className="w-4 h-4 shrink-0 text-slate-500" />
+                        <span className="truncate">{destination.address.split(',')[0]}</span>
+                      </div>
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-[10px] uppercase font-bold text-violet-400">Est. Total</p>
+                      <p className="text-lg font-black text-white">PKR {fare * seats}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
       </div>
     </div>
   );
