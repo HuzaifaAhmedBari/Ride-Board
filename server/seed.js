@@ -45,16 +45,16 @@ const USERS = [
 ];
 
 const RIDES_SPEC = [
-  { p: 0, o: 'Gulshan', ol: [67.0971, 24.9180], d: 'Clifton', dl: [67.0325, 24.8138], h: 24, s: 3, f: 300, st: 'active' },
-  { p: 1, o: 'DHA Ph 6', ol: [67.0648, 24.7993], d: 'Saddar', dl: [67.0101, 24.8607], h: 48, s: 2, f: 200, st: 'active' },
-  { p: 2, o: 'North Nazimabad', ol: [67.0323, 24.9453], d: 'Airport', dl: [67.1610, 24.9060], h: 72, s: 4, f: 500, st: 'active' },
-  { p: 3, o: 'Johar Ph 1', ol: [67.1350, 24.9200], d: 'Bahria Town', dl: [67.3300, 24.9800], h: 96, s: 3, f: 800, st: 'active' },
-  { p: 4, o: 'Malir', ol: [67.1957, 24.8920], d: 'Tariq Road', dl: [67.0583, 24.8722], h: 12, s: 4, f: 250, st: 'active' },
-  { p: 5, o: 'Korangi', ol: [67.1167, 24.8333], d: 'LuckyOne Mall', dl: [67.0894, 24.9258], h: 36, s: 3, f: 350, st: 'active' },
-  { p: 6, o: 'Orangi', ol: [66.9934, 24.9472], d: 'Garden East', dl: [67.0286, 24.8770], h: 60, s: 2, f: 150, st: 'active' },
-  { p: 7, o: 'DHA Ph 8', ol: [67.0700, 24.7800], d: 'Nazimabad 7', dl: [67.0300, 24.9100], h: 84, s: 4, f: 450, st: 'active' },
-  { p: 0, o: 'Federal B Area', ol: [67.0694, 24.9353], d: 'Kemari', dl: [66.9750, 24.8210], h: 120, s: 3, f: 400, st: 'active' },
-  { p: 1, o: 'PECHS', ol: [67.0600, 24.8700], d: 'Steel Town', dl: [67.3400, 24.8500], h: 144, s: 2, f: 600, st: 'active' },
+  { p: 0, o: 'Gulshan', ol: [67.0971, 24.9180], d: 'Clifton', dl: [67.0325, 24.8138], h: 4, s: 3, f: 300, st: 'active' },
+  { p: 1, o: 'DHA Ph 6', ol: [67.0648, 24.7993], d: 'Saddar', dl: [67.0101, 24.8607], h: 8, s: 2, f: 200, st: 'active' },
+  { p: 2, o: 'North Nazimabad', ol: [67.0323, 24.9453], d: 'Airport', dl: [67.1610, 24.9060], h: 12, s: 4, f: 500, st: 'active' },
+  { p: 3, o: 'Johar Ph 1', ol: [67.1350, 24.9200], d: 'Bahria Town', dl: [67.3300, 24.9800], h: 24, s: 3, f: 800, st: 'active' },
+  { p: 4, o: 'Malir', ol: [67.1957, 24.8920], d: 'Tariq Road', dl: [67.0583, 24.8722], h: 2, s: 4, f: 250, st: 'active' },
+  { p: 5, o: 'Korangi', ol: [67.1167, 24.8333], d: 'LuckyOne Mall', dl: [67.0894, 24.9258], h: 6, s: 3, f: 350, st: 'active' },
+  { p: 6, o: 'Orangi', ol: [66.9934, 24.9472], d: 'Garden East', dl: [67.0286, 24.8770], h: 18, s: 2, f: 150, st: 'active' },
+  { p: 7, o: 'DHA Ph 8', ol: [67.0700, 24.7800], d: 'Nazimabad 7', dl: [67.0300, 24.9100], h: 36, s: 4, f: 450, st: 'active' },
+  { p: 0, o: 'Federal B Area', ol: [67.0694, 24.9353], d: 'Kemari', dl: [66.9750, 24.8210], h: 48, s: 3, f: 400, st: 'active' },
+  { p: 1, o: 'PECHS', ol: [67.0600, 24.8700], d: 'Steel Town', dl: [67.3400, 24.8500], h: 72, s: 2, f: 600, st: 'active' },
 ];
 
 async function seed() {

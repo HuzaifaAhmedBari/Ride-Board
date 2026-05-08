@@ -99,4 +99,30 @@ router.get('/:id', async (req, res) => {
   res.json(data);
 });
 
+/**
+ * PATCH /api/rides/:id/cancel
+ * Cancels a ride. Auth required — only the poster can cancel.
+ */
+router.patch('/:id/cancel', requireAuth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { data: ride, error: findErr } = await supabase.from('rides').select('poster_id, status').eq('id', id).single();
+    if (findErr || !ride) return res.status(404).json({ error: 'Ride not found' });
+    
+    if (ride.poster_id !== req.user.id) return res.status(403).json({ error: 'Not authorized to cancel this ride' });
+    if (ride.status === 'expired' || ride.status === 'cancelled') return res.status(400).json({ error: 'Ride cannot be cancelled' });
+
+    const { error: updErr } = await supabase.from('rides').update({ status: 'cancelled' }).eq('id', id);
+    if (updErr) throw updErr;
+
+    // Cancel all associated bookings as well
+    await supabase.from('bookings').update({ status: 'cancelled' }).eq('ride_id', id);
+
+    res.json({ success: true, message: 'Ride cancelled successfully' });
+  } catch (err) {
+    console.error('[Ride Cancel Error]:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

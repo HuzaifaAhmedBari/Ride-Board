@@ -147,7 +147,7 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
               </Button>
             )}
             
-            {alreadyBooked && onCancel && (
+            {(alreadyBooked || isOwnRide) && !isCompleted && onCancel && (
               <Button
                 size="sm"
                 variant="destructive"
@@ -155,7 +155,7 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
                 onClick={e => { e.stopPropagation(); onCancel(ride); }}
               >
                 <XCircle className="w-4 h-4 mr-1" />
-                {showLabels && <span className="text-xs font-bold">Cancel</span>}
+                {showLabels && <span className="text-xs font-bold">{isOwnRide ? 'Cancel Trip' : 'Cancel'}</span>}
               </Button>
             )}
             

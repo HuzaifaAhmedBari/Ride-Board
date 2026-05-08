@@ -6,7 +6,8 @@ import api from '../api';
 import RouteCard from '../components/RouteCard';
 import ChatWindow from '../components/ChatWindow';
 import { useAuthStore } from '../store/authStore';
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -33,6 +34,7 @@ function MapUpdater({ selectedRide }) {
         bounds = L.latLngBounds([[selectedRide.origin_lat, selectedRide.origin_lng], [selectedRide.destination_lat, selectedRide.destination_lng]]);
       }
       setTimeout(() => {
+        if (!map) return;
         map.invalidateSize();
         map.fitBounds(bounds, { padding: [40, 40], animate: true, maxZoom: 15 });
       }, 350);
@@ -93,13 +95,18 @@ export default function ProfilePage() {
 
   async function confirmCancelBooking() {
     if (!cancelConfirmRide) return;
+    const isDriver = cancelConfirmRide.poster_id === profile.id;
     try {
-      await api.delete(`/bookings/${cancelConfirmRide.id}`);
+      if (isDriver) {
+        await api.patch(`/rides/${cancelConfirmRide.id}/cancel`);
+      } else {
+        await api.delete(`/bookings/${cancelConfirmRide.id}`);
+      }
       loadData();
       if (selectedRide?.id === cancelConfirmRide.id) setSelectedRide(null);
       setCancelConfirmRide(null);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to cancel booking');
+      alert(err.response?.data?.error || `Failed to cancel ${isDriver ? 'ride' : 'booking'}`);
       setCancelConfirmRide(null);
     }
   }
@@ -240,14 +247,14 @@ export default function ProfilePage() {
                         <Car className="w-6 h-6 text-muted-foreground" />
                       </div>
                       <p className="text-muted-foreground font-medium">You haven't posted any rides.</p>
-                      <Button asChild variant="link" className="text-primary p-0 h-auto">
-                        <Link to="/post">Post a Ride Now</Link>
-                      </Button>
+                      <Link to="/post" className={cn(buttonVariants({ variant: 'link' }), "text-primary p-0 h-auto")}>
+                        Post a Ride Now
+                      </Link>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {data.posted_active.map(ride => (
-                        <RouteCard key={ride.id} ride={{...ride, poster: profile}} isSelected={selectedRide?.id === ride.id} onSelect={setSelectedRide} showBook={false} isOwnRide={true} onChat={setChatRide} showLabels={true} />
+                        <RouteCard key={ride.id} ride={{...ride, poster: profile}} isSelected={selectedRide?.id === ride.id} onSelect={setSelectedRide} showBook={false} isOwnRide={true} onChat={setChatRide} onCancel={setCancelConfirmRide} showLabels={true} />
                       ))}
                     </div>
                   )}
@@ -263,23 +270,23 @@ export default function ProfilePage() {
                       Passenger (Booked)
                     </h2>
                     <Badge variant="outline" className="border-border text-muted-foreground">
-                      {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length} UPCOMING
+                      {data.booked_rides.filter(b => b.status !== 'cancelled' && (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length} UPCOMING
                     </Badge>
                   </div>
                   
-                  {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length === 0 ? (
+                  {data.booked_rides.filter(b => b.status !== 'cancelled' && (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length === 0 ? (
                     <div className="bg-card/30 border-2 border-dashed border-border rounded-2xl p-10 text-center space-y-3">
                       <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto opacity-50">
                         <Users className="w-6 h-6 text-muted-foreground" />
                       </div>
                       <p className="text-muted-foreground font-medium">No upcoming bookings found.</p>
-                      <Button asChild variant="link" className="text-primary p-0 h-auto">
-                        <Link to="/find">Find a Ride</Link>
-                      </Button>
+                      <Link to="/find" className={cn(buttonVariants({ variant: 'link' }), "text-primary p-0 h-auto")}>
+                        Find a Ride
+                      </Link>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).map(booking => (
+                      {data.booked_rides.filter(b => b.status !== 'cancelled' && (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).map(booking => (
                         <RouteCard key={booking.id} ride={booking.ride} isSelected={selectedRide?.id === booking.ride.id} onSelect={() => setSelectedRide(booking.ride)} alreadyBooked={true} onCancel={setCancelConfirmRide} showBook={false} onChat={setChatRide} showLabels={true} />
                       ))}
                     </div>
@@ -403,20 +410,25 @@ export default function ProfilePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-red-500 text-2xl font-black">
               <XCircle className="w-8 h-8" />
-              Cancel Booking?
+              {cancelConfirmRide?.poster_id === profile.id ? 'Cancel Your Ride?' : 'Cancel Booking?'}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground text-lg pt-4 leading-relaxed">
-              Are you sure you want to cancel your booking for the trip to <strong className="text-white">{cancelConfirmRide?.destination_address?.split(',')[0]}</strong>?
+              {cancelConfirmRide?.poster_id === profile.id 
+                ? <>Are you sure you want to cancel your trip to <strong className="text-white">{cancelConfirmRide?.destination_address?.split(',')[0]}</strong>?</>
+                : <>Are you sure you want to cancel your booking for the trip to <strong className="text-white">{cancelConfirmRide?.destination_address?.split(',')[0]}</strong>?</>
+              }
             </DialogDescription>
           </DialogHeader>
           <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-xl mt-6">
             <p className="text-xs text-red-400 font-bold flex items-center gap-2 tracking-wide uppercase">
-              <Info className="w-4 h-4" /> This will notify the driver immediately.
+              <Info className="w-4 h-4" /> This action cannot be undone.
             </p>
           </div>
           <DialogFooter className="mt-8 gap-3 sm:flex-row flex-col">
-            <Button variant="outline" onClick={() => setCancelConfirmRide(null)} className="flex-1 border-border bg-muted/50 hover:bg-muted h-12 font-bold rounded-xl">Keep My Seat</Button>
-            <Button variant="destructive" onClick={confirmCancelBooking} className="flex-1 h-12 font-black rounded-xl shadow-lg shadow-red-500/20">Yes, Cancel</Button>
+            <Button variant="outline" onClick={() => setCancelConfirmRide(null)} className="flex-1 border-border bg-muted/50 hover:bg-muted h-12 font-bold rounded-xl">
+              {cancelConfirmRide?.poster_id === profile.id ? 'Keep Ride' : 'Keep My Seat'}
+            </Button>
+            <Button onClick={confirmCancelBooking} className="flex-1 bg-red-950/30 text-red-500 border border-red-500/20 hover:bg-red-950/50 hover:text-red-400 h-12 font-black rounded-xl transition-all shadow-none">Yes, Cancel</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

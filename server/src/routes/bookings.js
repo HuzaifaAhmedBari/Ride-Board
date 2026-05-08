@@ -71,11 +71,12 @@ router.delete('/:ride_id', requireAuth, async (req, res) => {
       .update({ status: 'cancelled' })
       .eq('ride_id', ride_id)
       .eq('rider_id', req.user.id)
+      .neq('status', 'cancelled') // Only update if not already cancelled
       .select()
       .single();
 
     if (updateErr || !booking) {
-      return res.status(400).json({ error: 'Booking not found or could not be cancelled' });
+      return res.status(400).json({ error: 'Booking already cancelled or not found' });
     }
 
     // 2. Increment seats remaining and reactivate the ride

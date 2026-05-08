@@ -23,7 +23,7 @@ CREATE TABLE public.rides (
   fare_per_seat         NUMERIC NOT NULL CHECK (fare_per_seat >= 0),
   route_polyline        JSONB,       -- GeoJSON LineString from OSRM, may be null
   status                TEXT NOT NULL DEFAULT 'active'
-                        CHECK (status IN ('active', 'expired', 'full')),
+                        CHECK (status IN ('active', 'expired', 'full', 'cancelled')),
   created_at            TIMESTAMPTZ DEFAULT NOW()
 );
 
