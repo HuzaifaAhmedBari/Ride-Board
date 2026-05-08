@@ -58,7 +58,7 @@ export default function PostRidePage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-65px)] bg-slate-950 p-6 md:p-12 overflow-y-auto">
+    <div className="min-h-[calc(100vh-65px)] bg-background p-6 md:p-12 overflow-y-auto">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left: Form (5 columns) */}
@@ -67,28 +67,28 @@ export default function PostRidePage() {
           animate={{ opacity: 1, x: 0 }}
           className="lg:col-span-5"
         >
-          <Card className="bg-slate-900 border-slate-800 shadow-2xl sticky top-4">
+          <Card className="bg-card border-border shadow-2xl sticky top-4">
             <CardHeader>
               <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                <Car className="text-violet-500 w-6 h-6" />
+                <Car className="text-primary w-6 h-6" />
                 Post a New Ride
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
-                  <div className={`p-4 rounded-xl border transition-all ${activePicking === 'origin' ? 'bg-violet-500/5 border-violet-500/30 ring-1 ring-violet-500/20' : 'bg-slate-800/50 border-slate-700'}`} onClick={() => setActivePicking('origin')}>
-                    <Label className="text-slate-400 mb-2 block flex items-center justify-between">
+                  <div className={`p-4 rounded-xl border transition-all ${activePicking === 'origin' ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20' : 'bg-muted/50 border-border'}`} onClick={() => setActivePicking('origin')}>
+                    <Label className="text-muted-foreground mb-2 block flex items-center justify-between">
                       Origin Location
-                      {activePicking === 'origin' && <span className="text-[10px] bg-violet-600 text-white px-2 py-0.5 rounded-full uppercase">Picking on Map</span>}
+                      {activePicking === 'origin' && <span className="text-[10px] bg-primary text-white px-2 py-0.5 rounded-full uppercase">Picking on Map</span>}
                     </Label>
                     <AddressSearchBox placeholder="Where are you starting?" onSelect={setOrigin} value={origin?.address} />
                   </div>
 
-                  <div className={`p-4 rounded-xl border transition-all ${activePicking === 'destination' ? 'bg-violet-500/5 border-violet-500/30 ring-1 ring-violet-500/20' : 'bg-slate-800/50 border-slate-700'}`} onClick={() => setActivePicking('destination')}>
-                    <Label className="text-slate-400 mb-2 block flex items-center justify-between">
+                  <div className={`p-4 rounded-xl border transition-all ${activePicking === 'destination' ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20' : 'bg-muted/50 border-border'}`} onClick={() => setActivePicking('destination')}>
+                    <Label className="text-muted-foreground mb-2 block flex items-center justify-between">
                       Destination Location
-                      {activePicking === 'destination' && <span className="text-[10px] bg-violet-600 text-white px-2 py-0.5 rounded-full uppercase">Picking on Map</span>}
+                      {activePicking === 'destination' && <span className="text-[10px] bg-primary text-white px-2 py-0.5 rounded-full uppercase">Picking on Map</span>}
                     </Label>
                     <AddressSearchBox placeholder="Where are you going?" onSelect={setDestination} value={destination?.address} />
                   </div>
@@ -96,28 +96,28 @@ export default function PostRidePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-slate-400 flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-violet-400" /> Departure
+                    <Label className="text-muted-foreground flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" /> Departure
                     </Label>
                     <Input
                       type="datetime-local"
                       required
-                      className="bg-slate-800 border-slate-700 text-white"
+                      className="bg-muted border-border text-white"
                       value={startTime}
                       onChange={e => setStartTime(e.target.value)}
                       min={new Date(Date.now() + 15 * 60000).toISOString().slice(0, 16)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-400 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-indigo-400" /> Available Seats
+                    <Label className="text-muted-foreground flex items-center gap-2">
+                      <Users className="w-4 h-4 text-primary" /> Available Seats
                     </Label>
                     <Input
                       type="number"
                       required
                       min="1"
                       max="6"
-                      className="bg-slate-800 border-slate-700 text-white"
+                      className="bg-muted border-border text-white"
                       value={seats}
                       onChange={e => {
                         const val = parseInt(e.target.value, 10);
@@ -130,7 +130,7 @@ export default function PostRidePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-400 flex items-center gap-2">
+                  <Label className="text-muted-foreground flex items-center gap-2">
                     <Banknote className="w-4 h-4 text-emerald-500" /> Fare per Seat (PKR)
                   </Label>
                   <Input
@@ -138,7 +138,7 @@ export default function PostRidePage() {
                     required
                     min="0"
                     step="10"
-                    className="bg-slate-800 border-slate-700 text-white text-lg font-bold"
+                    className="bg-muted border-border text-white text-lg font-bold"
                     value={fare}
                     onChange={e => {
                       const val = parseFloat(e.target.value);
@@ -152,7 +152,7 @@ export default function PostRidePage() {
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-lg font-bold shadow-lg shadow-violet-600/20"
+                  className="w-full h-12 bg-primary hover:bg-primary text-lg font-bold shadow-lg shadow-primary/20"
                   disabled={loading}
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm & Post Ride'}
@@ -169,11 +169,11 @@ export default function PostRidePage() {
           className="lg:col-span-7 space-y-4"
         >
           <div className="h-full flex flex-col gap-4">
-            <Card className="bg-slate-900 border-slate-800 overflow-hidden flex-1 min-h-[500px] flex flex-col">
+            <Card className="bg-card border-border overflow-hidden flex-1 min-h-[500px] flex flex-col">
               <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-sm font-medium text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <Navigation2 className="w-4 h-4 text-violet-500" />
+                  <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                    <Navigation2 className="w-4 h-4 text-primary" />
                     Interactive Map Selection
                   </CardTitle>
                 </div>
@@ -182,7 +182,7 @@ export default function PostRidePage() {
                     variant={activePicking === 'origin' ? 'default' : 'outline'} 
                     size="sm" 
                     onClick={() => setActivePicking('origin')}
-                    className={activePicking === 'origin' ? 'bg-violet-600' : 'border-slate-700 text-slate-400'}
+                    className={activePicking === 'origin' ? 'bg-primary' : 'border-border text-muted-foreground'}
                   >
                     Set Origin
                   </Button>
@@ -190,13 +190,13 @@ export default function PostRidePage() {
                     variant={activePicking === 'destination' ? 'default' : 'outline'} 
                     size="sm" 
                     onClick={() => setActivePicking('destination')}
-                    className={activePicking === 'destination' ? 'bg-violet-600' : 'border-slate-700 text-slate-400'}
+                    className={activePicking === 'destination' ? 'bg-primary' : 'border-border text-muted-foreground'}
                   >
                     Set Destination
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 flex-1 relative border-t border-slate-800">
+              <CardContent className="p-0 flex-1 relative border-t border-border">
                 <MapPicker 
                   key={activePicking} // Remount map when switching mode to reset temp selection
                   label={activePicking === 'origin' ? "Select Starting Point" : "Select Destination Point"}
@@ -217,18 +217,18 @@ export default function PostRidePage() {
 
             {origin && destination && (
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                <Card className="bg-violet-600/10 border-violet-600/20">
+                <Card className="bg-primary/10 border-primary/20">
                   <CardContent className="p-4 flex items-center justify-between text-white">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] uppercase font-bold text-violet-400">Planned Route</p>
+                      <p className="text-[10px] uppercase font-bold text-primary">Planned Route</p>
                       <div className="flex items-center gap-2 text-sm mt-1">
                         <span className="truncate">{origin.address.split(',')[0]}</span>
-                        <ArrowRight className="w-4 h-4 shrink-0 text-slate-500" />
+                        <ArrowRight className="w-4 h-4 shrink-0 text-muted-foreground" />
                         <span className="truncate">{destination.address.split(',')[0]}</span>
                       </div>
                     </div>
                     <div className="text-right ml-4">
-                      <p className="text-[10px] uppercase font-bold text-violet-400">Est. Total</p>
+                      <p className="text-[10px] uppercase font-bold text-primary">Est. Total</p>
                       <p className="text-lg font-black text-white">PKR {fare * seats}</p>
                     </div>
                   </CardContent>

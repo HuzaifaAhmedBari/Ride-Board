@@ -35,15 +35,15 @@ export default function DriverProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 p-6 space-y-8">
+      <div className="min-h-screen bg-background p-6 space-y-8">
         <div className="max-w-5xl mx-auto space-y-8">
-          <Skeleton className="h-48 w-full rounded-2xl bg-slate-900" />
+          <Skeleton className="h-48 w-full rounded-2xl bg-card" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-32 bg-slate-900" />
-            <Skeleton className="h-32 bg-slate-900" />
-            <Skeleton className="h-32 bg-slate-900" />
+            <Skeleton className="h-32 bg-card" />
+            <Skeleton className="h-32 bg-card" />
+            <Skeleton className="h-32 bg-card" />
           </div>
-          <Skeleton className="h-64 w-full bg-slate-900" />
+          <Skeleton className="h-64 w-full bg-card" />
         </div>
       </div>
     );
@@ -51,13 +51,13 @@ export default function DriverProfilePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
         <div className="space-y-4">
           <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
             <User className="w-10 h-10 text-red-500" />
           </div>
           <h1 className="text-2xl font-bold text-white">{error}</h1>
-          <Button asChild variant="outline" className="border-slate-800 text-slate-400">
+          <Button asChild variant="outline" className="border-border text-muted-foreground">
             <Link to="/find">Back to Search</Link>
           </Button>
         </div>
@@ -70,22 +70,22 @@ export default function DriverProfilePage() {
   const ratingInfo = data.profile.rating?.[0];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 pb-20">
+    <div className="min-h-screen bg-background text-muted-foreground pb-20">
       <div className="max-w-5xl mx-auto p-6 space-y-8">
         
         {/* HEADER SECTION */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 p-8 md:p-12"
+          className="relative overflow-hidden rounded-3xl bg-card border border-border p-8 md:p-12"
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 blur-[100px] -mr-32 -mt-32" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] -mr-32 -mt-32" />
           
           <div className="relative flex flex-col md:flex-row items-center md:items-start gap-8">
             <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 p-1">
-                <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
-                  <User className="w-16 h-16 text-violet-500" />
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-accent p-1">
+                <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
+                  <User className="w-16 h-16 text-primary" />
                 </div>
               </div>
             </div>
@@ -93,7 +93,7 @@ export default function DriverProfilePage() {
             <div className="flex-1 text-center md:text-left space-y-4">
               <div className="space-y-1">
                 <h1 className="text-4xl font-black text-white tracking-tight">{data.profile.name}</h1>
-                <p className="text-slate-500 flex items-center justify-center md:justify-start gap-2">
+                <p className="text-muted-foreground flex items-center justify-center md:justify-start gap-2">
                   <Calendar className="w-4 h-4" />
                   Member since {new Date(data.profile.created_at).toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })}
                 </p>
@@ -113,7 +113,7 @@ export default function DriverProfilePage() {
                  <Star className="w-8 h-8 fill-amber-500" />
                  {ratingInfo ? Number(ratingInfo.avg_rating).toFixed(1) : "N/A"}
                </div>
-               <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
+               <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
                  {ratingInfo?.review_count || 0} Total Reviews
                </p>
             </div>
@@ -122,38 +122,38 @@ export default function DriverProfilePage() {
 
         {/* STATS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-emerald-500/10 rounded-2xl">
                 <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
               <div>
                 <p className="text-2xl font-black text-white">{data.completed_rides}</p>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Rides Completed</p>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-tight">Rides Completed</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-violet-500/10 rounded-2xl">
-                <Clock className="w-8 h-8 text-violet-500" />
+              <div className="p-3 bg-primary/10 rounded-2xl">
+                <Clock className="w-8 h-8 text-primary" />
               </div>
               <div>
                 <p className="text-2xl font-black text-white">{data.active_rides.length}</p>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Currently Active</p>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-tight">Currently Active</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
+          <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-indigo-500/10 rounded-2xl">
-                <Award className="w-8 h-8 text-indigo-500" />
+              <div className="p-3 bg-secondary/10 rounded-2xl">
+                <Award className="w-8 h-8 text-secondary" />
               </div>
               <div>
                 <p className="text-2xl font-black text-white">{data.profile.rating?.[0]?.review_count || 0}</p>
-                <p className="text-xs text-slate-500 font-bold uppercase tracking-tight">Reviews Received</p>
+                <p className="text-xs text-muted-foreground font-bold uppercase tracking-tight">Reviews Received</p>
               </div>
             </CardContent>
           </Card>
@@ -163,16 +163,16 @@ export default function DriverProfilePage() {
           {/* ACTIVE RIDES */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-1 bg-violet-600 rounded-full" />
+              <div className="h-8 w-1 bg-primary rounded-full" />
               <h2 className="text-2xl font-black text-white tracking-tight">Current Offers</h2>
             </div>
 
             {data.active_rides.length === 0 ? (
-              <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-12 text-center space-y-4">
-                <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto opacity-50">
-                  <Calendar className="w-8 h-8 text-slate-500" />
+              <div className="bg-card/30 border border-border rounded-3xl p-12 text-center space-y-4">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto opacity-50">
+                  <Calendar className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="text-slate-400 font-medium">No active rides at the moment</p>
+                <p className="text-muted-foreground font-medium">No active rides at the moment</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -199,7 +199,7 @@ export default function DriverProfilePage() {
 
             <div className="space-y-4">
               {data.reviews.length === 0 ? (
-                <div className="p-8 text-center text-slate-500 bg-slate-900/30 rounded-3xl border border-slate-800 italic">
+                <div className="p-8 text-center text-muted-foreground bg-card/30 rounded-3xl border border-border italic">
                   No feedback yet
                 </div>
               ) : (
@@ -208,7 +208,7 @@ export default function DriverProfilePage() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     key={review.id} 
-                    className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3"
+                    className="bg-card border border-border p-5 rounded-2xl space-y-3"
                   >
                     <div className="flex justify-between items-start">
                       <div>
@@ -217,16 +217,16 @@ export default function DriverProfilePage() {
                           {[...Array(5)].map((_, i) => (
                             <Star 
                               key={i} 
-                              className={`w-3 h-3 ${i < review.rating ? 'text-amber-500 fill-amber-500' : 'text-slate-700'}`} 
+                              className={`w-3 h-3 ${i < review.rating ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground'}`} 
                             />
                           ))}
                         </div>
                       </div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase">
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase">
                         {new Date(review.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-400 leading-relaxed italic">
+                    <p className="text-sm text-muted-foreground leading-relaxed italic">
                       "{review.comment || 'No comment left.'}"
                     </p>
                   </motion.div>
@@ -245,18 +245,18 @@ export default function DriverProfilePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+              className="absolute inset-0 bg-background/80 backdrop-blur-sm"
               onClick={() => setChatRide(null)}
             />
             <motion.div 
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative w-full max-w-lg h-[600px] bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl"
+              className="relative w-full max-w-lg h-[600px] bg-card border border-border rounded-3xl overflow-hidden shadow-2xl"
               onClick={e => e.stopPropagation()}
             >
               <div className="absolute top-4 right-4 z-10">
-                <Button variant="ghost" size="icon" onClick={() => setChatRide(null)} className="h-10 w-10 bg-slate-800/50 rounded-full text-white hover:bg-slate-700">
+                <Button variant="ghost" size="icon" onClick={() => setChatRide(null)} className="h-10 w-10 bg-muted/50 rounded-full text-white hover:bg-muted">
                   ✕
                 </Button>
               </div>

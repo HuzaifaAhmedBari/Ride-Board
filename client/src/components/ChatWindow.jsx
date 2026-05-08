@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, MessageCircle, UserX } from 'lucide-react';
+import { Send, MessageCircle, UserX, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ChatWindow({ rideId, rideTitle }) {
@@ -62,24 +62,24 @@ export default function ChatWindow({ rideId, rideTitle }) {
     } finally { setSending(false); }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-full text-slate-500 text-sm">Loading chat...</div>;
+  if (loading) return <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Loading chat...</div>;
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
-      <div className="p-4 bg-slate-800/50 border-b border-slate-700 flex items-center gap-3">
-        <div className="p-2 bg-violet-500/10 rounded-lg">
-          <MessageCircle className="w-5 h-5 text-violet-400" />
+    <div className="flex flex-col h-full bg-card border border-border rounded-xl overflow-hidden shadow-2xl">
+      <div className="p-4 bg-muted/50 border-b border-border flex items-center gap-3">
+        <div className="p-2 bg-primary/10 rounded-lg">
+          <MessageCircle className="w-5 h-5 text-primary" />
         </div>
         <div>
           <h4 className="font-bold text-white text-sm truncate">{rideTitle}</h4>
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Group Discussion</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Group Discussion</p>
         </div>
       </div>
 
       <ScrollArea ref={scrollRef} className="flex-1 p-4 space-y-4">
         <div className="space-y-4">
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-600 text-center space-y-2">
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground text-center space-y-2">
               <MessageCircle className="w-12 h-12 opacity-10" />
               <p className="text-sm font-medium">No messages yet</p>
               <p className="text-xs">Coordinate with your co-riders here.</p>
@@ -97,19 +97,19 @@ export default function ChatWindow({ rideId, rideTitle }) {
                 >
                   <div className={`max-w-[85%] space-y-1 ${isOwn ? 'items-end' : 'items-start'}`}>
                     <div className="flex items-center gap-2 px-1">
-                      <span className="text-[10px] font-bold text-slate-500">
+                      <span className="text-[10px] font-bold text-muted-foreground">
                         {isOwn ? 'You' : (isCancelled ? 'Cancelled Rider' : (msg.sender?.name || 'User'))}
                       </span>
-                      <span className="text-[10px] text-slate-600">
+                      <span className="text-[10px] text-muted-foreground">
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <div className={`p-3 rounded-2xl text-sm ${
                       isOwn 
-                        ? 'bg-violet-600 text-white rounded-tr-none' 
+                        ? 'bg-primary text-white rounded-tr-none' 
                         : isCancelled 
                           ? 'bg-red-500/10 border border-red-500/20 text-red-400 italic rounded-tl-none' 
-                          : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-tl-none'
+                          : 'bg-muted text-muted-foreground border border-border rounded-tl-none'
                     }`}>
                       {isCancelled && <UserX className="inline-block w-3 h-3 mr-1 mb-0.5" />}
                       {msg.content}
@@ -122,10 +122,10 @@ export default function ChatWindow({ rideId, rideTitle }) {
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSend} className="p-4 bg-slate-800/30 border-t border-slate-700 flex gap-2">
+      <form onSubmit={handleSend} className="p-4 bg-muted/30 border-t border-border flex gap-2">
         <Input 
           placeholder="Message co-riders..." 
-          className="flex-1 bg-slate-900 border-slate-700 text-white placeholder:text-slate-600 focus:ring-violet-500"
+          className="flex-1 bg-card border-border text-white placeholder:text-muted-foreground focus:ring-primary"
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
           disabled={sending}
@@ -135,7 +135,7 @@ export default function ChatWindow({ rideId, rideTitle }) {
           type="submit" 
           size="icon" 
           disabled={!newMessage.trim() || sending}
-          className="bg-violet-600 hover:bg-violet-500 shrink-0"
+          className="bg-primary hover:bg-primary shrink-0"
         >
           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </Button>

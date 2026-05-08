@@ -28,8 +28,8 @@ export default function RegisterPage() {
     }
 
     const cleanPhone = formData.phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10 || cleanPhone.length > 12) {
-      setError('Please enter a valid phone number (10-12 digits)');
+    if (cleanPhone.length !== 11) {
+      setError('Please enter a valid 11-digit phone number');
       setLoading(false);
       return;
     }
@@ -56,36 +56,36 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-65px)] bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-[calc(100vh-65px)] bg-background flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-lg relative z-10"
       >
-        <Card className="bg-slate-900 border-slate-800 shadow-2xl">
+        <Card className="bg-card border-border shadow-2xl">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="p-3 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-600/20">
+              <div className="p-3 bg-primary rounded-2xl shadow-xl shadow-primary/20">
                 <Car className="w-8 h-8 text-white" />
               </div>
             </div>
             <CardTitle className="text-3xl font-bold text-white tracking-tight">Join RideBoard</CardTitle>
-            <p className="text-slate-400 text-sm mt-1">Start sharing rides and saving costs today</p>
+            <p className="text-muted-foreground text-sm mt-1">Start sharing rides and saving costs today</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-400">Full Name</Label>
+                  <Label className="text-muted-foreground">Full Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="text"
                       required
-                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                      className="pl-10 bg-muted border-border text-white"
                       placeholder="John Doe"
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -93,29 +93,31 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-400">Phone</Label>
+                  <Label className="text-muted-foreground">Phone</Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       type="tel"
                       required
-                      className="pl-10 bg-slate-800 border-slate-700 text-white"
-                      placeholder="+92 3XX-XXXXXXX"
+                      maxLength={11}
+                      pattern="\d{11}"
+                      className={`pl-10 bg-muted border-border text-white focus:ring-primary transition-colors ${formData.phone && formData.phone.replace(/\D/g, '').length !== 11 ? 'border-red-500/50 bg-red-500/5' : ''}`}
+                      placeholder="03XXXXXXXXX"
                       value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={e => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '') })}
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-400">Email Address</Label>
+                <Label className="text-muted-foreground">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="email"
                     required
-                    className="pl-10 bg-slate-800 border-slate-700 text-white"
+                    className="pl-10 bg-muted border-border text-white"
                     placeholder="name@example.com"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -124,13 +126,13 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-400">Password</Label>
+                <Label className="text-muted-foreground">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="password"
                     required
-                    className="pl-10 bg-slate-800 border-slate-700 text-white"
+                    className="pl-10 bg-muted border-border text-white"
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={e => setFormData({ ...formData, password: e.target.value })}
@@ -146,7 +148,7 @@ export default function RegisterPage() {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-600/20 mt-2" 
+                className="w-full h-12 bg-primary hover:bg-primary/90 text-[#051a0d] font-bold transition-all shadow-lg shadow-primary/20 mt-2" 
                 disabled={loading}
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
@@ -158,10 +160,10 @@ export default function RegisterPage() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4 border-t border-slate-800 pt-6">
-            <p className="text-slate-400 text-sm text-center w-full">
+          <CardFooter className="flex flex-col gap-4 border-t border-border pt-6">
+            <p className="text-muted-foreground text-sm text-center w-full">
               Already have an account? {' '}
-              <Link to="/login" className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors">
+              <Link to="/login" className="text-primary font-semibold hover:text-primary/80 transition-colors">
                 Sign in
               </Link>
             </p>

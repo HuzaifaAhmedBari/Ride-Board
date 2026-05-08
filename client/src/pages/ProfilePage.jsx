@@ -79,8 +79,8 @@ export default function ProfilePage() {
       alert('Name must be at least 3 characters long');
       return;
     }
-    if (!/^\d{10,12}$/.test(phone)) {
-      alert('Please enter a valid phone number (10-12 digits)');
+    if (!/^\d{11}$/.test(phone)) {
+      alert('Please enter a valid 11-digit phone number');
       return;
     }
 
@@ -130,16 +130,16 @@ export default function ProfilePage() {
   const displayDriver = selectedRide?.poster || profile;
 
   if (loading) return (
-    <div className="flex items-center justify-center h-[calc(100vh-65px)] text-white bg-slate-950">
+    <div className="flex items-center justify-center h-[calc(100vh-65px)] text-white bg-background">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-violet-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 font-medium">Loading your profile...</p>
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-muted-foreground font-medium">Loading your profile...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-65px)] bg-slate-950 overflow-hidden text-white">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-65px)] bg-background overflow-hidden text-white">
       
       {/* LEFT COLUMN */}
       <div className={`flex-1 overflow-y-auto p-6 transition-all duration-500 custom-scrollbar ${selectedRide ? 'md:w-[45%]' : 'w-full'}`}>
@@ -147,21 +147,21 @@ export default function ProfilePage() {
           
           {/* PROFILE CARD */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="bg-slate-900 border-slate-800 overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/5 blur-[80px] -mr-32 -mt-32" />
+            <Card className="bg-card border-border overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] -mr-32 -mt-32" />
               <CardContent className="pt-8 pb-8 relative">
                 <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
                   <div className="flex flex-col md:flex-row items-center gap-6">
                     <div className="relative group">
-                      <div className="w-24 h-24 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-2xl flex items-center justify-center text-4xl font-black shadow-2xl shadow-violet-500/20 transform group-hover:scale-105 transition-transform">
+                      <div className="w-24 h-24 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-4xl font-black shadow-2xl shadow-primary/20 transform group-hover:scale-105 transition-transform">
                         {profile?.name?.charAt(0)}
                       </div>
                     </div>
                     <div className="text-center md:text-left space-y-2">
                       <h1 className="text-3xl font-black tracking-tight">{profile?.name}</h1>
-                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-slate-400 text-xs font-medium uppercase tracking-wider">
-                        <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-violet-500"/> Joined {new Date(profile?.created_at).toLocaleDateString('en-PK', { month: 'short', year: 'numeric' })}</span>
-                        {profile?.phone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-violet-500"/> {profile.phone}</span>}
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-muted-foreground text-xs font-medium uppercase tracking-wider">
+                        <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary"/> Joined {new Date(profile?.created_at).toLocaleDateString('en-PK', { month: 'short', year: 'numeric' })}</span>
+                        {profile?.phone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-primary"/> {profile.phone}</span>}
                         {profile?.rating?.[0] && (
                           <span className="flex items-center gap-1.5 text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
                             <Star className="w-3.5 h-3.5 fill-amber-500" /> {Number(profile.rating[0].avg_rating).toFixed(1)}
@@ -170,7 +170,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setEditing(!editing)} className="border-slate-800 bg-slate-800/50 hover:bg-slate-800 text-slate-300 font-bold">
+                  <Button variant="outline" size="sm" onClick={() => setEditing(!editing)} className="border-border bg-muted/50 hover:bg-muted text-foreground font-bold">
                     <Settings className="w-4 h-4 mr-2" />
                     {editing ? 'Cancel' : 'Edit Profile'}
                   </Button>
@@ -182,21 +182,27 @@ export default function ProfilePage() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="mt-8 pt-8 border-t border-slate-800 overflow-hidden"
+                      className="mt-8 pt-8 border-t border-border overflow-hidden"
                     >
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
                         <div className="space-y-2">
-                          <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Full Name</Label>
-                          <Input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="bg-slate-950 border-slate-800 h-12 focus:ring-violet-500" />
+                          <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Full Name</Label>
+                          <Input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="bg-background border-border h-12 focus:ring-primary" />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Phone Number</Label>
-                          <Input value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="bg-slate-950 border-slate-800 h-12 focus:ring-violet-500" />
+                          <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">Phone Number</Label>
+                          <Input 
+                            value={editForm.phone} 
+                            maxLength={11}
+                            placeholder="03XXXXXXXXX"
+                            onChange={e => setEditForm({ ...editForm, phone: e.target.value.replace(/\D/g, '') })} 
+                            className={`bg-background border-border h-12 focus:ring-primary transition-colors ${editForm.phone && editForm.phone.length !== 11 ? 'border-red-500/50 bg-red-500/5' : ''}`} 
+                          />
                         </div>
                       </div>
                       <div className="flex gap-3 mt-6">
-                        <Button onClick={handleSaveProfile} className="bg-violet-600 hover:bg-violet-500 font-black px-8">Save Changes</Button>
-                        <Button variant="ghost" onClick={() => setEditing(false)} className="text-slate-400 hover:text-white">Discard</Button>
+                        <Button onClick={handleSaveProfile} className="bg-primary hover:bg-primary font-black px-8">Save Changes</Button>
+                        <Button variant="ghost" onClick={() => setEditing(false)} className="text-muted-foreground hover:text-white">Discard</Button>
                       </div>
                     </motion.div>
                   )}
@@ -206,9 +212,9 @@ export default function ProfilePage() {
           </motion.div>
 
           <Tabs defaultValue="active" className="w-full flex flex-col">
-            <TabsList className="bg-slate-900 border border-slate-800 p-1 mb-6 h-12 rounded-xl w-full max-w-md mx-auto">
-              <TabsTrigger value="active" className="flex-1 rounded-lg data-[state=active]:bg-violet-600 data-[state=active]:text-white font-bold transition-all">Active Rides</TabsTrigger>
-              <TabsTrigger value="history" className="flex-1 rounded-lg data-[state=active]:bg-violet-600 data-[state=active]:text-white font-bold transition-all">Journey History</TabsTrigger>
+            <TabsList className="bg-card border border-border p-1 mb-6 h-12 rounded-xl w-full max-w-md mx-auto">
+              <TabsTrigger value="active" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white font-bold transition-all">Active Rides</TabsTrigger>
+              <TabsTrigger value="history" className="flex-1 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white font-bold transition-all">Journey History</TabsTrigger>
             </TabsList>
 
             <TabsContent value="active" className="outline-none space-y-12">
@@ -218,30 +224,30 @@ export default function ProfilePage() {
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-black text-white flex items-center gap-3">
-                      <div className="p-2 bg-violet-600/20 rounded-lg">
-                        <Car className="w-5 h-5 text-violet-500" />
+                      <div className="p-2 bg-primary/20 rounded-lg">
+                        <Car className="w-5 h-5 text-primary" />
                       </div>
                       Driving (Posted)
                     </h2>
-                    <Badge variant="outline" className="border-slate-800 text-slate-500">
+                    <Badge variant="outline" className="border-border text-muted-foreground">
                       {data.posted_active.length} ACTIVE
                     </Badge>
                   </div>
                   
                   {data.posted_active.length === 0 ? (
-                    <div className="bg-slate-900/30 border-2 border-dashed border-slate-800 rounded-2xl p-10 text-center space-y-3">
-                      <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto opacity-50">
-                        <Car className="w-6 h-6 text-slate-500" />
+                    <div className="bg-card/30 border-2 border-dashed border-border rounded-2xl p-10 text-center space-y-3">
+                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto opacity-50">
+                        <Car className="w-6 h-6 text-muted-foreground" />
                       </div>
-                      <p className="text-slate-500 font-medium">You haven't posted any rides.</p>
-                      <Button asChild variant="link" className="text-violet-500 p-0 h-auto">
+                      <p className="text-muted-foreground font-medium">You haven't posted any rides.</p>
+                      <Button asChild variant="link" className="text-primary p-0 h-auto">
                         <Link to="/post">Post a Ride Now</Link>
                       </Button>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {data.posted_active.map(ride => (
-                        <RouteCard key={ride.id} ride={{...ride, poster: profile}} isSelected={selectedRide?.id === ride.id} onSelect={setSelectedRide} showBook={false} isOwnRide={true} onChat={setChatRide} />
+                        <RouteCard key={ride.id} ride={{...ride, poster: profile}} isSelected={selectedRide?.id === ride.id} onSelect={setSelectedRide} showBook={false} isOwnRide={true} onChat={setChatRide} showLabels={true} />
                       ))}
                     </div>
                   )}
@@ -251,30 +257,30 @@ export default function ProfilePage() {
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-black text-white flex items-center gap-3">
-                      <div className="p-2 bg-indigo-600/20 rounded-lg">
-                        <Users className="w-5 h-5 text-indigo-500" />
+                      <div className="p-2 bg-secondary/20 rounded-lg">
+                        <Users className="w-5 h-5 text-secondary" />
                       </div>
                       Passenger (Booked)
                     </h2>
-                    <Badge variant="outline" className="border-slate-800 text-slate-500">
+                    <Badge variant="outline" className="border-border text-muted-foreground">
                       {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length} UPCOMING
                     </Badge>
                   </div>
                   
                   {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).length === 0 ? (
-                    <div className="bg-slate-900/30 border-2 border-dashed border-slate-800 rounded-2xl p-10 text-center space-y-3">
-                      <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto opacity-50">
-                        <Users className="w-6 h-6 text-slate-500" />
+                    <div className="bg-card/30 border-2 border-dashed border-border rounded-2xl p-10 text-center space-y-3">
+                      <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto opacity-50">
+                        <Users className="w-6 h-6 text-muted-foreground" />
                       </div>
-                      <p className="text-slate-500 font-medium">No upcoming bookings found.</p>
-                      <Button asChild variant="link" className="text-violet-500 p-0 h-auto">
+                      <p className="text-muted-foreground font-medium">No upcoming bookings found.</p>
+                      <Button asChild variant="link" className="text-primary p-0 h-auto">
                         <Link to="/find">Find a Ride</Link>
                       </Button>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {data.booked_rides.filter(b => (b.ride.status === 'active' || b.ride.status === 'full') && new Date(b.ride.start_time) > new Date()).map(booking => (
-                        <RouteCard key={booking.id} ride={booking.ride} isSelected={selectedRide?.id === booking.ride.id} onSelect={() => setSelectedRide(booking.ride)} alreadyBooked={true} onCancel={setCancelConfirmRide} showBook={false} onChat={setChatRide} />
+                        <RouteCard key={booking.id} ride={booking.ride} isSelected={selectedRide?.id === booking.ride.id} onSelect={() => setSelectedRide(booking.ride)} alreadyBooked={true} onCancel={setCancelConfirmRide} showBook={false} onChat={setChatRide} showLabels={true} />
                       ))}
                     </div>
                   )}
@@ -285,8 +291,8 @@ export default function ProfilePage() {
             <TabsContent value="history" className="outline-none">
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
-                   <div className="p-2 bg-slate-800 rounded-lg">
-                    <History className="w-5 h-5 text-slate-400" />
+                   <div className="p-2 bg-muted rounded-lg">
+                    <History className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <h2 className="text-xl font-black text-white">Journey History</h2>
                 </div>
@@ -298,9 +304,9 @@ export default function ProfilePage() {
                   ].sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
                   
                   if (completed.length === 0) return (
-                    <div className="p-20 text-center bg-slate-900/20 border border-slate-800 rounded-3xl">
-                      <Info className="w-12 h-12 text-slate-800 mx-auto mb-4" />
-                      <p className="text-slate-500 font-medium italic">No past journeys on record.</p>
+                    <div className="p-20 text-center bg-card/20 border border-border rounded-3xl">
+                      <Info className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground font-medium italic">No past journeys on record.</p>
                     </div>
                   );
                   
@@ -332,7 +338,7 @@ export default function ProfilePage() {
                             }
                           />
                           <div className="absolute top-4 left-4">
-                            <Badge className={`${ride.role === 'driver' ? 'bg-violet-600/20 text-violet-400 border-violet-600/30' : 'bg-indigo-600/20 text-indigo-400 border-indigo-600/30'} backdrop-blur-md`}>
+                            <Badge className={`${ride.role === 'driver' ? 'bg-primary/20 text-primary border-primary/30' : 'bg-secondary/20 text-secondary border-secondary/30'} backdrop-blur-md`}>
                               {ride.role.toUpperCase()}
                             </Badge>
                           </div>
@@ -355,14 +361,14 @@ export default function ProfilePage() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="w-full md:w-[55%] border-l border-slate-800 bg-slate-900 flex flex-col z-30 shadow-2xl"
+            className="w-full md:w-[55%] border-l border-border bg-card flex flex-col z-30 shadow-2xl"
           >
-            <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/80 backdrop-blur-md">
+            <div className="p-6 border-b border-border flex items-center justify-between bg-card/80 backdrop-blur-md">
               <div>
                 <h3 className="font-black text-lg text-white">Ride Details</h3>
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Trip Overview & Map</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Trip Overview & Map</p>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedRide(null)} className="h-10 w-10 bg-slate-800/50 rounded-full text-slate-400 hover:text-white">✕</Button>
+              <Button variant="ghost" size="icon" onClick={() => setSelectedRide(null)} className="h-10 w-10 bg-muted/50 rounded-full text-muted-foreground hover:text-white">✕</Button>
             </div>
             
             <div className="flex-1 relative overflow-hidden">
@@ -371,7 +377,7 @@ export default function ProfilePage() {
                 <MapUpdater selectedRide={selectedRide} />
                 <Marker position={[selectedRide.origin_lat, selectedRide.origin_lng]} icon={blueIcon} />
                 <Marker position={[selectedRide.destination_lat, selectedRide.destination_lng]} icon={blueIcon} />
-                {polylineCoords.length > 0 && <Polyline positions={polylineCoords} color="#3b82f6" weight={6} opacity={0.8} lineCap="round" />}
+                {polylineCoords.length > 0 && <Polyline positions={polylineCoords} color="#00D084" weight={6} opacity={0.8} lineCap="round" />}
               </MapContainer>
 
             </div>
@@ -381,7 +387,7 @@ export default function ProfilePage() {
 
       {/* CHAT DIALOG */}
       <Dialog open={!!chatRide} onOpenChange={() => setChatRide(null)}>
-        <DialogContent className="max-w-lg p-0 bg-slate-900 border-slate-800 h-[600px] flex flex-col rounded-3xl overflow-hidden shadow-2xl">
+        <DialogContent className="max-w-lg p-0 bg-card border-border h-[600px] flex flex-col rounded-3xl overflow-hidden shadow-2xl">
           {chatRide && (
             <ChatWindow 
               rideId={chatRide.id} 
@@ -393,13 +399,13 @@ export default function ProfilePage() {
 
       {/* CANCEL DIALOG */}
       <Dialog open={!!cancelConfirmRide} onOpenChange={() => setCancelConfirmRide(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white rounded-3xl p-8">
+        <DialogContent className="bg-card border-border text-white rounded-3xl p-8">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-red-500 text-2xl font-black">
               <XCircle className="w-8 h-8" />
               Cancel Booking?
             </DialogTitle>
-            <DialogDescription className="text-slate-400 text-lg pt-4 leading-relaxed">
+            <DialogDescription className="text-muted-foreground text-lg pt-4 leading-relaxed">
               Are you sure you want to cancel your booking for the trip to <strong className="text-white">{cancelConfirmRide?.destination_address?.split(',')[0]}</strong>?
             </DialogDescription>
           </DialogHeader>
@@ -409,7 +415,7 @@ export default function ProfilePage() {
             </p>
           </div>
           <DialogFooter className="mt-8 gap-3 sm:flex-row flex-col">
-            <Button variant="outline" onClick={() => setCancelConfirmRide(null)} className="flex-1 border-slate-800 bg-slate-800/50 hover:bg-slate-800 h-12 font-bold rounded-xl">Keep My Seat</Button>
+            <Button variant="outline" onClick={() => setCancelConfirmRide(null)} className="flex-1 border-border bg-muted/50 hover:bg-muted h-12 font-bold rounded-xl">Keep My Seat</Button>
             <Button variant="destructive" onClick={confirmCancelBooking} className="flex-1 h-12 font-black rounded-xl shadow-lg shadow-red-500/20">Yes, Cancel</Button>
           </DialogFooter>
         </DialogContent>
@@ -417,10 +423,10 @@ export default function ProfilePage() {
 
       {/* REVIEW DIALOG */}
       <Dialog open={!!reviewModal} onOpenChange={() => setReviewModal(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white text-center rounded-3xl p-8 max-w-md">
+        <DialogContent className="bg-card border-border text-white text-center rounded-3xl p-8 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-3xl font-black tracking-tight">How was your trip?</DialogTitle>
-            <DialogDescription className="text-slate-400 pt-2 text-base">Your feedback helps keep the RideBoard community safe and reliable for everyone.</DialogDescription>
+            <DialogDescription className="text-muted-foreground pt-2 text-base">Your feedback helps keep the RideBoard community safe and reliable for everyone.</DialogDescription>
           </DialogHeader>
           <div className="py-8 flex flex-col items-center gap-8">
             <div className="flex gap-3">
@@ -428,16 +434,16 @@ export default function ProfilePage() {
                 <button 
                   key={num} 
                   onClick={() => setReviewRating(num)} 
-                  className={`transition-all duration-300 transform hover:scale-125 ${num <= reviewRating ? 'text-amber-500' : 'text-slate-800'}`}
+                  className={`transition-all duration-300 transform hover:scale-125 ${num <= reviewRating ? 'text-amber-500' : 'text-muted-foreground'}`}
                 >
                   <Star className={`w-12 h-12 ${num <= reviewRating ? 'fill-amber-500' : ''}`} />
                 </button>
               ))}
             </div>
             <div className="w-full space-y-3 text-left">
-              <Label className="text-slate-500 font-bold uppercase text-[10px] tracking-widest ml-1">Share your experience (Optional)</Label>
+              <Label className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest ml-1">Share your experience (Optional)</Label>
               <textarea 
-                className="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl p-4 text-sm focus:border-violet-600 outline-none transition-all resize-none min-h-[120px]" 
+                className="w-full bg-background border-2 border-border rounded-2xl p-4 text-sm focus:border-primary outline-none transition-all resize-none min-h-[120px]" 
                 placeholder="Was the driver punctual? How was the vehicle?" 
                 value={reviewComment}
                 onChange={e => setReviewComment(e.target.value)}
@@ -445,8 +451,8 @@ export default function ProfilePage() {
             </div>
           </div>
           <DialogFooter className="gap-3 sm:flex-row flex-col">
-            <Button variant="ghost" onClick={() => setReviewModal(null)} className="flex-1 text-slate-500 hover:text-white h-12">Skip</Button>
-            <Button onClick={handleSubmitReview} disabled={submittingReview} className="flex-1 bg-violet-600 hover:bg-violet-500 font-black h-12 rounded-xl shadow-lg shadow-violet-500/20">
+            <Button variant="ghost" onClick={() => setReviewModal(null)} className="flex-1 text-muted-foreground hover:text-white h-12">Skip</Button>
+            <Button onClick={handleSubmitReview} disabled={submittingReview} className="flex-1 bg-primary hover:bg-primary font-black h-12 rounded-xl shadow-lg shadow-primary/20">
               {submittingReview ? 'Submitting...' : 'Submit Review'}
             </Button>
           </DialogFooter>

@@ -29,9 +29,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-65px)] bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-[calc(100vh-65px)] bg-background flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -39,26 +39,26 @@ export default function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         <div className="flex justify-center mb-8">
-          <div className="p-3 bg-violet-600 rounded-2xl shadow-xl shadow-violet-600/20">
+          <div className="p-3 bg-primary rounded-2xl shadow-xl shadow-primary/20">
             <Car className="w-10 h-10 text-white" />
           </div>
         </div>
 
-        <Card className="bg-slate-900 border-slate-800 shadow-2xl">
+        <Card className="bg-card border-border shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold text-white tracking-tight">Welcome Back</CardTitle>
-            <p className="text-slate-400 text-sm mt-1">Sign in to your RideBoard account</p>
+            <p className="text-muted-foreground text-sm mt-1">Sign in to your RideBoard account</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-slate-400">Email Address</Label>
+                <Label className="text-muted-foreground">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="email"
                     required
-                    className="pl-10 bg-slate-800 border-slate-700 text-white focus:ring-violet-500"
+                    className="pl-10 bg-muted border-border text-white focus:ring-primary"
                     placeholder="name@example.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
@@ -67,14 +67,14 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label className="text-slate-400">Password</Label>
+                  <Label className="text-muted-foreground">Password</Label>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="password"
                     required
-                    className="pl-10 bg-slate-800 border-slate-700 text-white focus:ring-violet-500"
+                    className="pl-10 bg-muted border-border text-white focus:ring-primary"
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
               <Button 
                 type="submit" 
-                className="w-full h-12 bg-violet-600 hover:bg-violet-500 text-white font-bold transition-all shadow-lg shadow-violet-600/20" 
+                className="w-full h-12 bg-primary hover:bg-primary text-white font-bold transition-all shadow-lg shadow-primary/20" 
                 disabled={loading}
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
@@ -106,10 +106,10 @@ export default function LoginPage() {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col gap-4 border-t border-slate-800 pt-6">
-            <p className="text-slate-400 text-sm">
+          <CardFooter className="flex flex-col gap-4 border-t border-border pt-6">
+            <p className="text-muted-foreground text-sm">
               Don't have an account? {' '}
-              <Link to="/register" className="text-violet-400 font-semibold hover:text-violet-300 transition-colors">
+              <Link to="/register" className="text-primary font-semibold hover:text-primary transition-colors">
                 Create one now
               </Link>
             </p>

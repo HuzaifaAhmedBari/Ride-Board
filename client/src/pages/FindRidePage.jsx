@@ -115,9 +115,9 @@ export default function FindRidePage() {
   const polylineCoords = selectedRide?.route_polyline?.coordinates?.map(c => [c[1], c[0]]) || [];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-65px)] bg-slate-950 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-65px)] bg-background overflow-hidden">
       <Dialog open={!!mapModalOpen} onOpenChange={() => setMapModalOpen(null)}>
-        <DialogContent showCloseButton={false} className="max-w-4xl h-[80vh] p-0 bg-slate-900 border-slate-800 text-white overflow-hidden">
+        <DialogContent showCloseButton={false} className="max-w-4xl h-[80vh] p-0 bg-card border-border text-white overflow-hidden">
           <MapPicker 
             label={`Select ${mapModalOpen === 'pickup' ? 'Pickup' : 'Dropoff'} Location`}
             value={mapModalOpen === 'pickup' ? pickup : dropoff} 
@@ -133,11 +133,11 @@ export default function FindRidePage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT COLUMN */}
-        <aside className="w-full md:w-[400px] border-r border-slate-800 flex flex-col bg-slate-900/50 backdrop-blur-sm z-20">
-          <div className="p-4 space-y-4 border-b border-slate-800">
+        <aside className="w-full md:w-[400px] border-r border-border flex flex-col bg-card/50 backdrop-blur-sm z-20">
+          <div className="p-4 space-y-4 border-b border-border">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Search className="w-5 h-5 text-violet-500" />
+                <Search className="w-5 h-5 text-primary" />
                 Find a Ride
               </h2>
             </div>
@@ -147,7 +147,7 @@ export default function FindRidePage() {
                 <div className="flex-1">
                   <AddressSearchBox placeholder="Pickup Location" onSelect={setPickup} value={pickup?.address} />
                 </div>
-                <Button variant="outline" size="icon" onClick={() => setMapModalOpen('pickup')} className="border-slate-800 hover:bg-slate-800">
+                <Button variant="outline" size="icon" onClick={() => setMapModalOpen('pickup')} className="border-border hover:bg-muted">
                   <MapIcon className="w-4 h-4" />
                 </Button>
               </div>
@@ -155,11 +155,11 @@ export default function FindRidePage() {
                 <div className="flex-1">
                   <AddressSearchBox placeholder="Dropoff Location" onSelect={setDropoff} value={dropoff?.address} />
                 </div>
-                <Button variant="outline" size="icon" onClick={() => setMapModalOpen('dropoff')} className="border-slate-800 hover:bg-slate-800">
+                <Button variant="outline" size="icon" onClick={() => setMapModalOpen('dropoff')} className="border-border hover:bg-muted">
                   <MapIcon className="w-4 h-4" />
                 </Button>
               </div>
-              <Button onClick={handleSearch} disabled={loading} className="w-full bg-violet-600 hover:bg-violet-500 font-bold">
+              <Button onClick={handleSearch} disabled={loading} className="w-full bg-primary hover:bg-primary font-bold">
                 {loading ? 'Searching...' : 'Search Rides'}
               </Button>
             </div>
@@ -169,11 +169,11 @@ export default function FindRidePage() {
           <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
             <AnimatePresence mode="popLayout">
               {loading ? (
-                [1,2,3].map(i => <Skeleton key={i} className="h-[180px] w-full rounded-xl bg-slate-800" />)
+                [1,2,3].map(i => <Skeleton key={i} className="h-[180px] w-full rounded-xl bg-muted" />)
               ) : results.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-500 space-y-2 text-center">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground space-y-2 text-center">
                   <Info className="w-12 h-12 opacity-20" />
-                  <p className="font-medium text-slate-400">No rides available right now</p>
+                  <p className="font-medium text-muted-foreground">No rides available right now</p>
                   <p className="text-sm">Try adjusting your search or check back later</p>
                 </div>
               ) : (
@@ -194,7 +194,7 @@ export default function FindRidePage() {
         </aside>
 
         {/* RIGHT COLUMN (MAP) */}
-        <main className="flex-1 relative bg-slate-900">
+        <main className="flex-1 relative bg-card">
           <MapContainer center={[24.8607, 67.0011]} zoom={11} className="h-full w-full grayscale-[0.2] contrast-[1.1]">
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
             <MapUpdater selectedRide={selectedRide} pickup={pickup} dropoff={dropoff} />
@@ -204,7 +204,7 @@ export default function FindRidePage() {
               <>
                 <Marker position={[selectedRide.origin_lat,      selectedRide.origin_lng]}      icon={blueIcon} />
                 <Marker position={[selectedRide.destination_lat, selectedRide.destination_lng]} icon={blueIcon} />
-                {polylineCoords.length > 0 && <Polyline positions={polylineCoords} color="#3b82f6" weight={5} opacity={0.8} />}
+                {polylineCoords.length > 0 && <Polyline positions={polylineCoords} color="#00D084" weight={5} opacity={0.8} />}
               </>
             )}
           </MapContainer>
@@ -218,14 +218,14 @@ export default function FindRidePage() {
                 exit={{ y: 100, opacity: 0 }}
                 className="absolute bottom-6 left-6 right-6 z-[1000] md:left-auto md:w-[400px]"
               >
-                <Card className="bg-slate-900/90 border-slate-700 backdrop-blur-lg shadow-2xl">
+                <Card className="bg-card/90 border-border backdrop-blur-lg shadow-2xl">
                   <CardHeader className="pb-2 flex flex-row items-center justify-between">
                     <CardTitle className="text-white text-lg">Selected Ride</CardTitle>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedRide(null)} className="h-8 w-8 text-slate-400 hover:text-white">×</Button>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedRide(null)} className="h-8 w-8 text-muted-foreground hover:text-white">×</Button>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 bg-violet-500/10 rounded-lg border border-violet-500/20">
-                      <div className="w-10 h-10 bg-violet-600 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                         <User className="text-white w-5 h-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -233,11 +233,11 @@ export default function FindRidePage() {
                           to={`/driver/${selectedRide.poster?.id}`} 
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-violet-400 font-bold hover:underline block truncate"
+                          className="text-primary font-bold hover:underline block truncate"
                         >
                           {selectedRide.poster?.name || 'Driver'}
                         </Link>
-                        <div className="flex gap-3 text-xs text-slate-400 mt-1">
+                        <div className="flex gap-3 text-xs text-muted-foreground mt-1">
                           {selectedRide.poster?.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3"/> {selectedRide.poster.phone}</span>}
                         </div>
                       </div>
@@ -245,24 +245,24 @@ export default function FindRidePage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">From</p>
-                        <p className="text-sm text-slate-200 font-medium truncate">{selectedRide.origin_address.split(',')[0]}</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">From</p>
+                        <p className="text-sm text-muted-foreground font-medium truncate">{selectedRide.origin_address.split(',')[0]}</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">To</p>
-                        <p className="text-sm text-slate-200 font-medium truncate">{selectedRide.destination_address.split(',')[0]}</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">To</p>
+                        <p className="text-sm text-muted-foreground font-medium truncate">{selectedRide.destination_address.split(',')[0]}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-                      <div className="text-2xl font-black text-violet-400">
+                    <div className="flex items-center justify-between pt-4 border-t border-border">
+                      <div className="text-2xl font-black text-primary">
                         PKR {selectedRide.fare_per_seat}
-                        <span className="text-xs text-slate-500 font-normal ml-1">/ seat</span>
+                        <span className="text-xs text-muted-foreground font-normal ml-1">/ seat</span>
                       </div>
                       <Button
                         disabled={bookedRideIds.has(selectedRide.id) || selectedRide.poster_id === user?.id || selectedRide.seats_remaining === 0}
                         onClick={() => handleBook(selectedRide)}
-                        className={`font-bold ${bookedRideIds.has(selectedRide.id) ? 'bg-emerald-600' : 'bg-violet-600 hover:bg-violet-500'}`}
+                        className={`font-bold ${bookedRideIds.has(selectedRide.id) ? 'bg-emerald-600' : 'bg-primary hover:bg-primary'}`}
                       >
                         {bookedRideIds.has(selectedRide.id) ? '✓ Booked' : 'Book Now'}
                       </Button>

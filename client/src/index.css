@@ -1,25 +1,26 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @theme {
-  --color-border: hsl(217.2 32.6% 17.5%);
-  --color-input: hsl(217.2 32.6% 17.5%);
-  --color-ring: hsl(224.3 76.3% 48%);
-  --color-background: hsl(222.2 84% 4.9%);
-  --color-foreground: hsl(210 40% 98%);
-  --color-primary: hsl(217.2 91.2% 59.8%);
-  --color-primary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-secondary: hsl(217.2 32.6% 17.5%);
-  --color-secondary-foreground: hsl(210 40% 98%);
+  --color-border: hsl(0 0% 18%);
+  --color-input: hsl(0 0% 18%);
+  --color-ring: hsl(158 100% 41%);
+  --color-background: hsl(0 0% 7%);
+  --color-foreground: hsl(0 0% 100%);
+  --color-primary: hsl(158 100% 41%);
+  --color-primary-foreground: hsl(0 0% 7%);
+  --color-secondary: hsl(174 62% 47%);
+  --color-secondary-foreground: hsl(0 0% 100%);
   --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-muted: hsl(217.2 32.6% 17.5%);
-  --color-muted-foreground: hsl(215 20.2% 65.1%);
-  --color-accent: hsl(217.2 32.6% 17.5%);
-  --color-accent-foreground: hsl(210 40% 98%);
-  --color-popover: hsl(222.2 84% 4.9%);
-  --color-popover-foreground: hsl(210 40% 98%);
-  --color-card: hsl(222.2 84% 4.9%);
-  --color-card-foreground: hsl(210 40% 98%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(0 0% 18%);
+  --color-muted-foreground: hsl(0 0% 65%);
+  --color-accent: hsl(174 62% 47%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-popover: hsl(0 0% 7%);
+  --color-popover-foreground: hsl(0 0% 100%);
+  --color-card: hsl(0 0% 12%);
+  --color-card-foreground: hsl(0 0% 100%);
   --radius-lg: 0.75rem;
   --radius-md: calc(0.75rem - 2px);
   --radius-sm: calc(0.75rem - 4px);
@@ -30,14 +31,17 @@
     border-color: var(--color-border);
   }
   body {
-    @apply bg-slate-950 text-foreground antialiased selection:bg-blue-500/30 selection:text-blue-200;
-    font-family: 'Inter', sans-serif;
+    @apply bg-[#121212] text-[#FFFFFF] antialiased selection:bg-[#00D084]/30 selection:text-[#FFFFFF];
+    font-family: 'DM Sans', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-slate-900/50 backdrop-blur-md border border-slate-800;
+    @apply bg-[#1E1E1E]/60 backdrop-blur-md border border-[#2A2A2A];
   }
 }
 
@@ -51,7 +55,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-800 rounded-full hover:bg-slate-700 transition-colors;
+  @apply bg-[#1E1E1E] rounded-full hover:bg-[#2A2A2A] transition-colors;
 }
 
 /* Date/Time Picker visibility and theme on Dark Mode */
@@ -82,7 +86,7 @@ input[type=number] {
 
 /* Leaflet Overrides */
 .leaflet-container {
-  background: #0f172a !important;
+  background: #121212 !important;
   border: none !important;
 }
 
@@ -91,11 +95,11 @@ input[type=number] {
 }
 
 .leaflet-bar a {
-  background-color: #0f172a !important;
+  background-color: #121212 !important;
   color: white !important;
-  border-color: #1e293b !important;
+  border-color: #1E1E1E !important;
 }
 
 .leaflet-bar a:hover {
-  background-color: #1e293b !important;
+  background-color: #1E1E1E !important;
 }

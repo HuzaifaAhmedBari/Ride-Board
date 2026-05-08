@@ -62,8 +62,8 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 overflow-hidden relative">
-      {label && <div className="px-4 py-2 bg-slate-800 text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-700">{label}</div>}
+    <div className="flex flex-col h-full bg-card overflow-hidden relative">
+      {label && <div className="px-4 py-2 bg-muted text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border">{label}</div>}
       
       <div className="flex-1 relative">
         <MapContainer
@@ -94,9 +94,9 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
         {/* Floating Confirmation Overlay */}
         <div className="absolute bottom-4 left-4 right-4 z-[1000] space-y-2">
           {tempValue && (
-            <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700 p-4 rounded-xl shadow-2xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="bg-card/90 backdrop-blur-md border border-border p-4 rounded-xl shadow-2xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase font-bold text-violet-400 flex items-center gap-1">
+                <p className="text-[10px] uppercase font-bold text-primary flex items-center gap-1">
                   <MapPin className="w-3 h-3" /> Selected Location
                 </p>
                 <p className="text-sm text-white font-medium truncate mt-0.5">
@@ -117,8 +117,8 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
           )}
 
           {!tempValue && (
-            <div className="bg-violet-600/20 backdrop-blur-md border border-violet-500/30 p-3 rounded-lg text-center animate-pulse">
-              <p className="text-xs font-bold text-violet-400">Click anywhere on the map to select a point</p>
+            <div className="bg-primary/20 backdrop-blur-md border border-primary/30 p-3 rounded-lg text-center animate-pulse">
+              <p className="text-xs font-bold text-primary">Click anywhere on the map to select a point</p>
             </div>
           )}
         </div>
@@ -129,7 +129,7 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
             variant="ghost" 
             size="icon" 
             onClick={onCancel}
-            className="absolute top-4 right-4 z-[1000] bg-slate-900/50 hover:bg-slate-800 text-white rounded-full h-8 w-8"
+            className="absolute top-4 right-4 z-[1000] bg-card/50 hover:bg-muted text-white rounded-full h-8 w-8"
           >
             <X className="w-4 h-4" />
           </Button>

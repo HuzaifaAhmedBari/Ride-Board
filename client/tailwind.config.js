@@ -6,16 +6,23 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['DM Sans', 'sans-serif'],
+        heading: ['Outfit', 'sans-serif'],
+      },
       colors: {
         primary: {
-          DEFAULT: "#3b82f6",
-          hover: "#2563eb",
+          DEFAULT: "#00D084",
+          hover: "#00B370",
+        },
+        secondary: {
+          DEFAULT: "#2EC4B6",
         },
         bg: {
-          DEFAULT: "#0f172a",
-          card: "#1e293b",
+          DEFAULT: "#121212",
+          card: "#1E1E1E",
         },
-        border: "#334155",
+        border: "#2A2A2A",
       }
     },
   },
