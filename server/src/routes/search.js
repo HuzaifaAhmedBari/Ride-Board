@@ -27,6 +27,7 @@ router.post('/', async (req, res) => {
         )
       `)
       .eq('status', 'active')
+      .gt('seats_remaining', 0)
       .order('fare_per_seat', { ascending: true });
 
     if (error) return res.status(500).json({ error: error.message });
@@ -44,6 +45,7 @@ router.post('/', async (req, res) => {
         )
       `)
       .eq('status', 'active')
+      .gt('seats_remaining', 0)
       .order('fare_per_seat', { ascending: true });
 
     if (error) throw error;
