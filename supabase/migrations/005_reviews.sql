@@ -1,4 +1,3 @@
--- Reviews table for ratings and trust
 CREATE TABLE public.reviews (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   ride_id       UUID NOT NULL REFERENCES public.rides(id) ON DELETE CASCADE,
@@ -8,15 +7,12 @@ CREATE TABLE public.reviews (
   comment       TEXT,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   
-  -- Prevent multiple reviews for the same ride by the same person
   UNIQUE (ride_id, reviewer_id)
 );
 
--- Indexing for performance
 CREATE INDEX idx_reviews_reviewee ON public.reviews (reviewee_id);
 CREATE INDEX idx_reviews_ride     ON public.reviews (ride_id);
 
--- View for aggregated ratings
 CREATE VIEW public.user_ratings AS
 SELECT 
   reviewee_id,
