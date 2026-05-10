@@ -1,13 +1,9 @@
--- 008_rls.sql: Row Level Security Policies
-
--- 1. ENABLE RLS ON ALL TABLES
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
--- 2. POLICIES FOR 'users'
 CREATE POLICY "Public profiles are viewable by everyone" 
 ON public.users FOR SELECT USING (true);
 
@@ -16,7 +12,6 @@ ON public.users FOR UPDATE
 TO authenticated 
 USING (auth.uid() = id);
 
--- 3. POLICIES FOR 'rides'
 CREATE POLICY "Rides are viewable by everyone" 
 ON public.rides FOR SELECT USING (true);
 
@@ -30,7 +25,6 @@ ON public.rides FOR UPDATE
 TO authenticated 
 USING (auth.uid() = poster_id);
 
--- 4. POLICIES FOR 'bookings'
 CREATE POLICY "Users can view own bookings" 
 ON public.bookings FOR SELECT 
 USING (
@@ -51,7 +45,6 @@ ON public.bookings FOR UPDATE
 TO authenticated 
 USING (auth.uid() = rider_id);
 
--- 5. POLICIES FOR 'messages'
 CREATE POLICY "Ride participants can view messages" 
 ON public.messages FOR SELECT 
 USING (
@@ -71,11 +64,20 @@ ON public.messages FOR INSERT
 TO authenticated 
 WITH CHECK (auth.uid() = sender_id);
 
--- 6. POLICIES FOR 'reviews'
 CREATE POLICY "Reviews are viewable by everyone" 
 ON public.reviews FOR SELECT USING (true);
+
 
 CREATE POLICY "Participants can leave reviews" 
 ON public.reviews FOR INSERT 
 TO authenticated 
 WITH CHECK (auth.uid() = reviewer_id);
+
+DROP VIEW IF EXISTS public.user_ratings;
+CREATE VIEW public.user_ratings WITH (security_invoker = true) AS
+SELECT 
+  reviewee_id,
+  AVG(rating) as avg_rating,
+  COUNT(id) as review_count
+FROM public.reviews
+GROUP BY reviewee_id;
