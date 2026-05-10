@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Loader2, MapPin } from 'lucide-react';
+import { Search, Loader2, MapPin, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,7 +17,11 @@ export default function AddressSearchBox({ onSelect, placeholder = 'Search a loc
     const val = e.target.value;
     setQuery(val);
     clearTimeout(debounceRef.current);
-    if (val.length < 3) { setSuggestions([]); return; }
+    if (val.length < 3) { 
+      setSuggestions([]); 
+      if (val === '') onSelect(null);
+      return; 
+    }
 
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
@@ -42,6 +46,12 @@ export default function AddressSearchBox({ onSelect, placeholder = 'Search a loc
     onSelect({ lat: parseFloat(item.lat), lng: parseFloat(item.lon), address: item.display_name });
   }
 
+  function handleClear() {
+    setQuery('');
+    setSuggestions([]);
+    onSelect(null);
+  }
+
   return (
     <div className="relative w-full">
       <div className="relative">
@@ -50,14 +60,17 @@ export default function AddressSearchBox({ onSelect, placeholder = 'Search a loc
           value={query}
           onChange={handleChange}
           placeholder={placeholder}
-          className="pl-10 bg-card border-border text-white placeholder:text-muted-foreground focus:ring-primary"
+          className="pl-10 pr-10 bg-card border-border text-white placeholder:text-muted-foreground focus:ring-primary"
           autoComplete="off"
         />
-        {searching && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Loader2 className="w-4 h-4 text-primary animate-spin" />
-          </div>
-        )}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          {searching && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
+          {query && !searching && (
+            <button onClick={handleClear} className="p-0.5 hover:bg-muted rounded-full transition-colors">
+              <X className="w-3.5 h-3.5 text-muted-foreground hover:text-white" />
+            </button>
+          )}
+        </div>
       </div>
 
       <AnimatePresence>

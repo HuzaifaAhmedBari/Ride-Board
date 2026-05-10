@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Calendar, Clock, MessageSquare, XCircle, CheckCircle2 } from 'lucide-react';
+import { User, Users, MapPin, Calendar, Clock, MessageSquare, XCircle, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 function getStatusBadge(ride) {
-  if (ride.status === 'expired') return { label: 'Expired', variant: 'secondary' };
-  if (ride.status === 'full')    return { label: 'Full',    variant: 'outline' };
+  if (ride.status === 'expired')   return { label: 'Expired',   variant: 'secondary' };
+  if (ride.status === 'cancelled') return { label: 'Cancelled', variant: 'destructive' };
+  if (ride.status === 'full')      return { label: 'Full',      variant: 'outline' };
   const minsUntil = (new Date(ride.start_time) - Date.now()) / 60000;
   if (minsUntil > 120) return { label: 'Active',  variant: 'default' };
   if (minsUntil > 30)  return { label: 'Soon',    variant: 'warning' };
@@ -27,7 +28,7 @@ function SeatDots({ total, remaining }) {
   );
 }
 
-export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, onChat, alreadyBooked, isOwnRide, showBook = true, isCompleted, hideBadge, extraFooterAction, showLabels = false }) {
+export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel, onChat, alreadyBooked, isOwnRide, showBook = true, isCompleted, hideBadge, extraFooterAction, showLabels = false, bookingStatus }) {
   const badgeInfo = getStatusBadge(ride);
   const canBook = !alreadyBooked && !isOwnRide && ride.status === 'active' && ride.seats_remaining > 0;
 
@@ -45,8 +46,8 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
     >
       {!hideBadge && (
         <div className="absolute top-0 left-4 z-10">
-          <Badge variant={isCompleted ? "secondary" : badgeInfo.variant} className="shadow-lg border-border">
-            {isCompleted ? 'Completed' : badgeInfo.label}
+          <Badge variant={bookingStatus === 'cancelled' ? 'destructive' : (isCompleted ? "secondary" : badgeInfo.variant)} className="shadow-lg border-border">
+            {bookingStatus === 'cancelled' ? 'Booking Cancelled' : (isCompleted ? (ride.status === 'cancelled' ? 'Ride Cancelled' : 'Completed') : badgeInfo.label)}
           </Badge>
         </div>
       )}
@@ -110,9 +111,20 @@ export default function RouteCard({ ride, onSelect, isSelected, onBook, onCancel
 
           <div className="pt-2">
             {isCompleted ? (
-              <div className="text-primary font-semibold text-sm">
-                {ridersTaken} rider{ridersTaken !== 1 ? 's' : ''} taken
-              </div>
+              ride.status === 'cancelled' ? (
+                <div className="text-red-500/70 font-bold text-xs uppercase tracking-wider">
+                  Trip was cancelled
+                </div>
+              ) : (
+                <div className="text-primary font-semibold text-sm flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  {ridersTaken === ride.total_seats ? (
+                    <span>Trip was Full ({ridersTaken} riders)</span>
+                  ) : (
+                    <span>{ridersTaken} rider{ridersTaken !== 1 ? 's' : ''} taken</span>
+                  )}
+                </div>
+              )
             ) : (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -29,7 +29,7 @@ router.get('/me', requireAuth, async (req, res) => {
       profile: profileRes.data,
       posted_rides: postedRides,
       posted_active: postedRides.filter(r => (r.status === 'active' || r.status === 'full') && new Date(r.start_time) > new Date()),
-      posted_expired: postedRides.filter(r => r.status === 'expired' || new Date(r.start_time) <= new Date()),
+      posted_expired: postedRides.filter(r => r.status === 'expired' || r.status === 'cancelled' || new Date(r.start_time) <= new Date()),
       booked_rides: bookedRides
     });
   } catch (err) {

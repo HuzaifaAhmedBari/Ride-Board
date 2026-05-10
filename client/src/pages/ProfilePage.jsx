@@ -302,7 +302,7 @@ export default function ProfilePage() {
                 {(() => {
                   const completed = [
                     ...data.posted_expired.map(r => ({ ...r, role: 'driver', poster: profile })),
-                    ...data.booked_rides.filter(b => b.ride.status === 'expired' || new Date(b.ride.start_time) <= new Date()).map(b => ({ ...b.ride, role: 'passenger', is_reviewed: b.is_reviewed, booking_id: b.id }))
+                    ...data.booked_rides.filter(b => b.status === 'cancelled' || b.ride.status === 'expired' || new Date(b.ride.start_time) <= new Date()).map(b => ({ ...b.ride, role: 'passenger', is_reviewed: b.is_reviewed, booking_id: b.id, bookingStatus: b.status }))
                   ].sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
                   
                   if (completed.length === 0) return (
@@ -321,6 +321,7 @@ export default function ProfilePage() {
                             isSelected={selectedRide?.id === ride.id} 
                             onSelect={setSelectedRide} 
                             isCompleted={true} 
+                            bookingStatus={ride.bookingStatus}
                             showBook={false} 
                             hideBadge={true} 
                             extraFooterAction={

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import api from '../api';
 import AddressSearchBox from '../components/AddressSearchBox';
 import MapPicker from '../components/MapPicker';
@@ -22,6 +22,13 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41]
 });
 const blueIcon = new L.Icon.Default();
+
+function MapEvents({ onMapClick }) {
+  useMapEvents({
+    click: () => onMapClick(),
+  });
+  return null;
+}
 
 function MapUpdater({ selectedRide, pickup, dropoff }) {
   const map = useMap();
@@ -84,15 +91,23 @@ export default function FindRidePage() {
     loadAll();
   }, [user]);
 
+  useEffect(() => {
+    handleSearch();
+  }, [pickup, dropoff]);
+
   async function handleSearch() {
     setLoading(true);
     setError('');
     setSelectedRide(null);
-    const payload = (pickup && dropoff) ? { pickup_lat: pickup.lat, pickup_lng: pickup.lng, dropoff_lat: dropoff.lat, dropoff_lng: dropoff.lng } : {};
+    
+    const payload = {};
+    if (pickup) { payload.pickup_lat = pickup.lat; payload.pickup_lng = pickup.lng; }
+    if (dropoff) { payload.dropoff_lat = dropoff.lat; payload.dropoff_lng = dropoff.lng; }
+
     try {
       const { data } = await api.post('/search', payload);
       setResults(data);
-      if (data.length === 0 && payload.pickup_lat) setError('No rides found near these locations.');
+      if (data.length === 0 && (pickup || dropoff)) setError('No rides found near these locations.');
     } catch (err) {
       setError(err.response?.data?.error || 'Search failed');
     } finally {
@@ -197,8 +212,11 @@ export default function FindRidePage() {
           <MapContainer center={[24.8607, 67.0011]} zoom={11} className="h-full w-full grayscale-[0.2] contrast-[1.1]">
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
             <MapUpdater selectedRide={selectedRide} pickup={pickup} dropoff={dropoff} />
+            <MapEvents onMapClick={() => setSelectedRide(null)} />
+            
             {pickup  && <Marker position={[pickup.lat,  pickup.lng]}  icon={redIcon} />}
             {dropoff && <Marker position={[dropoff.lat, dropoff.lng]} icon={redIcon} />}
+
             {selectedRide && (
               <>
                 <Marker position={[selectedRide.origin_lat,      selectedRide.origin_lng]}      icon={blueIcon} />

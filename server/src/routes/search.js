@@ -4,7 +4,7 @@ const supabase = require('../db');
 const { haversineDistance } = require('../utils/geo');
 
 // Proximity thresholds for ride matching
-const PICKUP_RADIUS_KM      = 1; // rider's pickup must be within this of any point on the route polyline
+const PICKUP_RADIUS_KM = 1; // rider's pickup must be within this of any point on the route polyline
 const DESTINATION_RADIUS_KM = 2; // rider's dropoff must be within this of the route's destination
 
 /**
@@ -13,7 +13,10 @@ const DESTINATION_RADIUS_KM = 2; // rider's dropoff must be within this of the r
  * If no coordinates are provided, returns all active rides sorted by fare.
  */
 router.post('/', async (req, res) => {
-  const { pickup_lat, pickup_lng, dropoff_lat, dropoff_lng } = req.body;
+  const pickup_lat = req.body.pickup_lat ? parseFloat(req.body.pickup_lat) : null;
+  const pickup_lng = req.body.pickup_lng ? parseFloat(req.body.pickup_lng) : null;
+  const dropoff_lat = req.body.dropoff_lat ? parseFloat(req.body.dropoff_lat) : null;
+  const dropoff_lng = req.body.dropoff_lng ? parseFloat(req.body.dropoff_lng) : null;
 
   // No location filter — return all active rides cheapest-first
   if (pickup_lat == null && dropoff_lat == null) {
@@ -59,19 +62,21 @@ router.post('/', async (req, res) => {
       }
 
       // 2. Rider's pickup must be near any point on the route polyline
-      let minPickupDist = 0;
+      let minPickupDist = Infinity;
       if (pickup_lat != null && pickup_lng != null) {
-        minPickupDist = Infinity;
+        // Check origin and destination first
+        const distOrigin = haversineDistance(pickup_lat, pickup_lng, ride.origin_lat, ride.origin_lng);
+        const distDest = haversineDistance(pickup_lat, pickup_lng, ride.destination_lat, ride.destination_lng);
+        minPickupDist = Math.min(distOrigin, distDest);
+
         if (ride.route_polyline?.coordinates) {
           const coords = ride.route_polyline.coordinates;
-          const STEP = 5;
-          for (let i = 0; i < coords.length; i += STEP) {
+          // Sample the polyline more finely (every 2 points)
+          for (let i = 0; i < coords.length; i += 2) {
             const [lng, lat] = coords[i];
             const dist = haversineDistance(pickup_lat, pickup_lng, lat, lng);
             if (dist < minPickupDist) minPickupDist = dist;
           }
-        } else {
-          minPickupDist = haversineDistance(pickup_lat, pickup_lng, ride.origin_lat, ride.origin_lng);
         }
 
         if (minPickupDist > PICKUP_RADIUS_KM) return acc;
@@ -79,7 +84,7 @@ router.post('/', async (req, res) => {
 
       acc.push({
         ...ride,
-        pickup_distance_km:  pickup_lat != null ? parseFloat(minPickupDist.toFixed(1)) : null,
+        pickup_distance_km: pickup_lat != null ? parseFloat(minPickupDist.toFixed(1)) : null,
         dropoff_distance_km: dropoff_lat != null ? parseFloat(dropoffDist.toFixed(1)) : null
       });
 
