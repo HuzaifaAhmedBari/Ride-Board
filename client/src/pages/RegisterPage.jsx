@@ -57,7 +57,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-[calc(100vh-65px)] bg-background flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Glow */}
+      
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div

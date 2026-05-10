@@ -23,7 +23,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#121212] relative overflow-x-hidden">
-      {/* Global Grid Background */}
+
       <div className="absolute inset-0 pointer-events-none z-0">
         <svg width="100%" height="100%">
           <defs>
@@ -75,7 +75,6 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          {/* Stats Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

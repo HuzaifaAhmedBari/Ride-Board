@@ -111,7 +111,6 @@ export default function ProfilePage() {
     }
   }
 
-  // Auto-scroll selected card to center
   useEffect(() => {
     if (selectedRide) {
       const element = document.getElementById(`ride-card-${selectedRide.id}`);
@@ -148,11 +147,9 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col md:flex-row h-[calc(100vh-65px)] bg-background overflow-hidden text-white">
       
-      {/* LEFT COLUMN */}
       <div className={`flex-1 overflow-y-auto p-6 transition-all duration-500 custom-scrollbar ${selectedRide ? 'md:w-[45%]' : 'w-full'}`}>
         <div className="max-w-5xl mx-auto space-y-8">
           
-          {/* PROFILE CARD */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="bg-card border-border overflow-hidden relative">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] -mr-32 -mt-32" />
@@ -227,7 +224,6 @@ export default function ProfilePage() {
             <TabsContent value="active" className="outline-none space-y-12">
               <div className={`grid grid-cols-1 ${selectedRide ? '' : 'xl:grid-cols-2'} gap-8 items-start`}>
                 
-                {/* POSTED RIDES (DRIVING) */}
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-black text-white flex items-center gap-3">
@@ -260,7 +256,6 @@ export default function ProfilePage() {
                   )}
                 </section>
 
-                {/* BOOKED RIDES (PASSENGER) */}
                 <section className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-black text-white flex items-center gap-3">
@@ -360,7 +355,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* RIGHT COLUMN (MAP SIDEBAR) */}
       <AnimatePresence>
         {selectedRide && (
           <motion.aside 
@@ -392,7 +386,6 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* CHAT DIALOG */}
       <Dialog open={!!chatRide} onOpenChange={() => setChatRide(null)}>
         <DialogContent className="max-w-lg p-0 bg-card border-border h-[600px] flex flex-col rounded-3xl overflow-hidden shadow-2xl">
           {chatRide && (
@@ -404,7 +397,6 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* CANCEL DIALOG */}
       <Dialog open={!!cancelConfirmRide} onOpenChange={() => setCancelConfirmRide(null)}>
         <DialogContent className="bg-card border-border text-white rounded-3xl p-8">
           <DialogHeader>
@@ -433,7 +425,6 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* REVIEW DIALOG */}
       <Dialog open={!!reviewModal} onOpenChange={() => setReviewModal(null)}>
         <DialogContent className="bg-card border-border text-white text-center rounded-3xl p-8 max-w-md">
           <DialogHeader>

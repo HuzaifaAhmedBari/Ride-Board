@@ -132,7 +132,7 @@ export default function FindRidePage() {
       </Dialog>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* LEFT COLUMN */}
+        
         <aside className="w-full md:w-[400px] border-r border-border flex flex-col bg-card/50 backdrop-blur-sm z-20">
           <div className="p-4 space-y-4 border-b border-border">
             <div className="flex items-center justify-between">
@@ -193,7 +193,6 @@ export default function FindRidePage() {
           </div>
         </aside>
 
-        {/* RIGHT COLUMN (MAP) */}
         <main className="flex-1 relative bg-card">
           <MapContainer center={[24.8607, 67.0011]} zoom={11} className="h-full w-full grayscale-[0.2] contrast-[1.1]">
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
@@ -209,7 +208,6 @@ export default function FindRidePage() {
             )}
           </MapContainer>
 
-          {/* RIDE DETAIL FLOATING PANEL */}
           <AnimatePresence>
             {selectedRide && (
               <motion.div 

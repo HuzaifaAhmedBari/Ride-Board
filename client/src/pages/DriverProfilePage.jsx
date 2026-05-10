@@ -73,7 +73,6 @@ export default function DriverProfilePage() {
     <div className="min-h-screen bg-background text-muted-foreground pb-20">
       <div className="max-w-5xl mx-auto p-6 space-y-8">
         
-        {/* HEADER SECTION */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -120,7 +119,6 @@ export default function DriverProfilePage() {
           </div>
         </motion.div>
 
-        {/* STATS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="bg-card/50 border-border backdrop-blur-sm">
             <CardContent className="p-6 flex items-center gap-4">
@@ -160,7 +158,7 @@ export default function DriverProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* ACTIVE RIDES */}
+          
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-3">
               <div className="h-8 w-1 bg-primary rounded-full" />
@@ -190,7 +188,6 @@ export default function DriverProfilePage() {
             )}
           </div>
 
-          {/* REVIEWS */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="h-8 w-1 bg-amber-500 rounded-full" />
@@ -237,7 +234,6 @@ export default function DriverProfilePage() {
         </div>
       </div>
 
-      {/* CHAT MODAL */}
       <AnimatePresence>
         {chatRide && (
           <div className="fixed inset-0 z-[5000] flex items-center justify-center p-4">

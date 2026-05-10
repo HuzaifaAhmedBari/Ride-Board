@@ -5,7 +5,6 @@ import L from 'leaflet';
 import { Button } from "@/components/ui/button";
 import { Check, MapPin, Loader2, X } from 'lucide-react';
 
-// Fix Leaflet default icon paths broken by bundlers
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
@@ -26,7 +25,6 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
   const [tempValue, setTempValue] = useState(value);
   const [loading, setLoading] = useState(false);
 
-  // Sync tempValue when prop value changes (e.g. if cleared from outside)
   useEffect(() => {
     setTempValue(value);
   }, [value]);
@@ -91,7 +89,6 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
           )}
         </MapContainer>
 
-        {/* Floating Confirmation Overlay */}
         <div className="absolute bottom-4 left-4 right-4 z-[1000] space-y-2">
           {tempValue && (
             <div className="bg-card/90 backdrop-blur-md border border-border p-4 rounded-xl shadow-2xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -123,7 +120,6 @@ export default function MapPicker({ label, value, onChange, onCancel, height = 4
           )}
         </div>
 
-        {/* Close Button if onCancel provided */}
         {onCancel && (
           <Button 
             variant="ghost" 

@@ -14,7 +14,7 @@ export default function PostRidePage() {
   const navigate = useNavigate();
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
-  const [activePicking, setActivePicking] = useState('origin'); // 'origin' or 'destination'
+  const [activePicking, setActivePicking] = useState('origin'); 
   const [startTime, setStartTime] = useState('');
   const [seats, setSeats] = useState(1);
   const [fare, setFare] = useState(0);
@@ -61,7 +61,6 @@ export default function PostRidePage() {
     <div className="min-h-[calc(100vh-65px)] bg-background p-6 md:p-12 overflow-y-auto">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left: Form (5 columns) */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -162,7 +161,6 @@ export default function PostRidePage() {
           </Card>
         </motion.div>
 
-        {/* Right: Map Picker (7 columns) */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -198,7 +196,7 @@ export default function PostRidePage() {
               </CardHeader>
               <CardContent className="p-0 flex-1 relative border-t border-border">
                 <MapPicker 
-                  key={activePicking} // Remount map when switching mode to reset temp selection
+                  key={activePicking} 
                   label={activePicking === 'origin' ? "Select Starting Point" : "Select Destination Point"}
                   value={activePicking === 'origin' ? origin : destination} 
                   onChange={(val) => {
